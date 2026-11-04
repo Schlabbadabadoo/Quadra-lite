@@ -3,17 +3,12 @@
 </p>
 
 <h1 align="center">
- Quadra, by QuadraHQ.
+ Quadra Lite
 </h1>
 
- <p align="center">
-    <a href="https://discord.gg/W8jXfngc8z">
-      <img src="https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white" alt="Discord" width="140">
-   </a>
- </p>
-
 <p align="center">
-  A bootstrapper for the macOS Roblox Player client, running on Linux through <a href="https://github.com/microlift/rosemary">Rosemary</a> or <a href="https://darlinghq.org">Darling</a>, and Roblox Studio via <a href="https://winehq.org">Wine</a>.
+  A lightweight fork of <a href="https://github.com/QuadraHQ/Quadra">Quadra</a> for the macOS Roblox Player client, running on Linux through <a href="https://github.com/microlift/rosemary">Rosemary</a> or <a href="https://darlinghq.org">Darling</a>.
+  Studio, Wine and everything that comes with them are gone; the launcher stays open while you play.
 </p>
 
 ## Migration from Cider / Mac O' Blox to Quadra
@@ -26,10 +21,10 @@ Quadra data is never replaced; Cider data takes precedence over MacOBlox data.
 
 ## Install
 
-Use the installer below to install or update.
+From a checkout of this fork:
 
 ```bash
-curl -fsSL https://quadrahq.org/install.sh | bash
+./install.sh
 ```
 
 **NixOS (x86_64):** use the [Nix package and NixOS module](packaging/nix/README.md).

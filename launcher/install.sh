@@ -41,8 +41,8 @@ install -d "$data_home/applications"
 cat > "$data_home/applications/org.quadrahq.Quadra.desktop" <<DESKTOP
 [Desktop Entry]
 Type=Application
-Name=Quadra
-Comment=Run the macOS Roblox client on Linux
+Name=Quadra Lite
+Comment=Run the macOS Roblox client on Linux through Rosemary or Darling
 Comment[ru]=Запуск клиента Roblox для macOS на Linux
 GenericName=Roblox launcher
 GenericName[ru]=Лаунчер Roblox

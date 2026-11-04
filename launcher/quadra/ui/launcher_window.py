@@ -46,7 +46,7 @@ __all__ = [
 
 class LauncherWindow(Adw.ApplicationWindow):
     def __init__(self, app, page=None):
-        super().__init__(application=app, title="Quadra")
+        super().__init__(application=app, title="Quadra Lite")
         self.set_default_size(760, 580)
         self.set_resizable(True)
         self.settings = core.SettingsStore(
