@@ -14,7 +14,7 @@ from quadra import core, graphics, ui
 from gi.repository import Adw, Gio
 
 saved, pending, errors = [], [], []
-application = Adw.Application(application_id="org.quadrahq.Quadra.RendererTest",
+application = Adw.Application(application_id="io.github.schlabbadabadoo.QuadraLite.RendererTest",
                               flags=Gio.ApplicationFlags.NON_UNIQUE)
 application.register(None)
 

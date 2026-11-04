@@ -45,8 +45,8 @@ class PlayPage(Adw.Bin):
         self.top_box = None
 
         status = Adw.StatusPage()
-        status.set_icon_name("quadrahq")
-        status.set_title("Quadra")
+        status.set_icon_name("quadralite")
+        status.set_title("Quadra Lite")
         self.status = status
 
         center_box = Gtk.Box(
@@ -146,7 +146,7 @@ class PlayPage(Adw.Bin):
             css_classes=["play-hero-head"],
         )
         identity = Gtk.Box(spacing=14)
-        identity.append(theme.Logo(core.ICONS / "quadrahq-64.png", 48))
+        identity.append(theme.Logo(core.ICONS / "quadralite-64.png", 48))
         titles = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3, hexpand=True)
         titles.append(Gtk.Label(label="Quadra", xalign=0, css_classes=["play-title"]))
         identity.append(titles)

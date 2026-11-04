@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Quadra installer: downloads the launcher and adds it to the app menu. It
-# installs nothing else: Quadra's first-boot screen chooses the theme and the
+# Quadra Lite installer: downloads the launcher and adds it to the app menu.
+# It installs nothing else: Quadra Lite's first-boot screen chooses the
 # runtime that plays Roblox (Rosemary or Darling), and installs that runtime.
 # The launcher needs only Python 3 with GTK 4 and libadwaita. Run it again to
 # update, or to uninstall.
 #
-#   curl -fsSL https://quadrahq.org/install.sh | bash
+#   ./install.sh
 #
-# In a terminal it guides setup; without one it installs. The choices
-# also work as options (with curl: ... | bash -s -- --uninstall), see --help.
+# In a terminal it guides setup; without one it installs. The choices also
+# work as options, see --help.
 #
 # Everything runs inside main(), called on the last line, so a download cut
 # off halfway does nothing. The exit on that same line matters: main points
@@ -19,9 +19,7 @@ set -euo pipefail
 
 REPO=https://github.com/Schlabbadabadoo/Quadra-Lite.git
 DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
-DIR=$DATA_HOME/QuadraHQ
-LEGACY_CIDER_DIR=$DATA_HOME/CiderHQ
-LEGACY_DIR=$DATA_HOME/MacOBlox
+DIR=$DATA_HOME/QuadraLite
 CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 CACHE_HOME=${XDG_CACHE_HOME:-$HOME/.cache}
 
@@ -45,30 +43,12 @@ say() { printf '  %s%s%s %s\n' "$ACCENT" "$BULLET" "$RESET" "$*"; }
 die() { printf '%sError:%s %s\n' "$BAD" "$RESET" "$*" >&2; exit 1; }
 
 
-migrate_user_directories() {
-  local base target source old
-  for base in "$CONFIG_HOME" "$CACHE_HOME" "$DATA_HOME"; do
-    target=$base/quadrahq
-    if [[ -e $target || -L $target ]]; then
-      # Keep existing Quadra data; an empty directory may be replaced.
-      [[ -d $target ]] && rmdir -- "$target" 2>/dev/null || continue
-    fi
-    for old in ciderhq macoblox; do
-      source=$base/$old
-      [[ -d $source ]] || continue
-      mv -T --no-clobber -- "$source" "$target"
-      [[ ! -e $source ]] || die "Could not migrate $source to $target; no files were replaced."
-      break
-    done
-  done
-}
-
 DARLING_RUNTIME=''
 DARLING_EXECUTABLE=darling
 PREFIX=${DPREFIX:-$HOME/.darling}
 
 load_darling_selection() {
-  local file=$CONFIG_HOME/quadrahq/runtime.json saved
+  local file=$CONFIG_HOME/quadralite/runtime.json saved
   [[ -f $file ]] && command -v python3 >/dev/null || return 0
   saved=$(python3 - "$file" <<'PY'
 import json
@@ -111,8 +91,8 @@ setup_plan() {
   is_installed && operation='Update'
   printf '  %sSetup plan%s\n\n' "$BOLD" "$RESET"
   printf '    1. Check for git, Python 3, GTK 4 and libadwaita.\n'
-  printf '    2. %s the Quadra launcher.\n' "$operation"
-  printf '    3. Add the app menu entry and quadrahq command.\n\n'
+  printf '    2. %s the Quadra Lite launcher.\n' "$operation"
+  printf '    3. Add the app menu entry and quadralite command.\n\n'
   printf '  Computer    %s (%s)\n' "$(distribution_name)" "$(uname -m)"
   printf '  Destination %s\n' "${DIR/#$HOME/\~}"
   printf '  %sNothing else is installed, and sudo is not used.%s\n' "$DIM" "$RESET"
@@ -120,7 +100,7 @@ setup_plan() {
     printf '  %sUpdates keep settings, Roblox and existing backups.%s\n' "$DIM" "$RESET"
     printf '  %sLocal source changes are backed up before replacement.%s\n' "$DIM" "$RESET"
   else
-    printf '  %sQuadra'"'"'s first-boot screen picks your theme and runtime, then installs them.%s\n' "$DIM" "$RESET"
+    printf '  %sQuadra Lite'"'"'s first-boot screen picks your runtime, then installs it.%s\n' "$DIM" "$RESET"
   fi
 }
 
@@ -136,8 +116,8 @@ backup_checkout_changes() {
     rm -rf -- "$list_dir"
     return
   fi
-  backup=$(umask 077; mkdir -p -- "$DATA_HOME/QuadraHQ-backups";
-    mktemp -d "$DATA_HOME/QuadraHQ-backups/update-$(date -u +%Y%m%d-%H%M%S)-XXXXXX")
+  backup=$(umask 077; mkdir -p -- "$DATA_HOME/QuadraLite-backups";
+    mktemp -d "$DATA_HOME/QuadraLite-backups/update-$(date -u +%Y%m%d-%H%M%S)-XXXXXX")
   git -C "$DIR" rev-parse HEAD > "$backup/revision"
   git -C "$DIR" diff --binary HEAD > "$backup/tracked.patch"
   cp -- "$list_dir/tracked" "$backup/tracked-paths"
@@ -152,30 +132,14 @@ backup_checkout_changes() {
   say "Local changes saved to ${backup/#$HOME/\~}"
 }
 
-# The website lives on main for hosting, but is not part of an app install.
-# Partial fetches omit blobs until checkout requests them; sparse checkout
-# keeps hosting paths from requesting those blobs or entering the worktree.
-configure_launcher_checkout() {
-  git -C "$DIR" config remote.origin.promisor true
-  git -C "$DIR" config remote.origin.partialclonefilter blob:none
-  git -C "$DIR" sparse-checkout set --no-cone --stdin <<'PATTERNS'
-/*
-!/website/
-!/.github/
-!/vercel.json
-!/.vercel/
-!/.vercelignore
-PATTERNS
-}
-
 setup_success() {
   local version
   version=$(installed_version)
   printf '\n%s%s Setup complete%s\n' "$GOOD" "$ON" "$RESET"
-  printf '  Quadra%s is ready in your app menu.\n' "${version:+ $version}"
+  printf '  Quadra Lite%s is ready in your app menu.\n' "${version:+ $version}"
   printf '\n  %sNext steps%s\n' "$BOLD" "$RESET"
-  printf '    1. Open Quadra from the app menu, or run quadrahq.\n'
-  printf '    2. Pick a theme and a runtime on its welcome screen; it installs them.\n'
+  printf '    1. Open Quadra Lite from the app menu, or run quadralite.\n'
+  printf '    2. Pick a runtime on its welcome screen; it installs it.\n'
   printf '    3. Sign in to Roblox and choose a game.\n'
   [[ -z $UPDATE_BACKUP ]] || printf '\n  Source backup: %s\n' "${UPDATE_BACKUP/#$HOME/\~}"
   printf '\n'
@@ -198,40 +162,15 @@ PYTHON
   say "git, Python 3, GTK 4 and libadwaita are installed"
 }
 
-# Moves a recognized earlier repository URL (the upstream MacOBlox repositories,
-# or Cider's CiderHQ-org/Cider before the QuadraHQ organization) to $REPO.
-# Other user-configured remotes are kept.
-migrate_origin_remote() {
-  case $(git -C "$DIR" remote get-url origin 2>/dev/null) in
-    https://github.com/narezy/MacOBlox | https://github.com/narezy/MacOBlox.git | \
-    https://github.com/aubree-lat/MacOBlox | https://github.com/aubree-lat/MacOBlox.git | \
-    git@github.com:aubree-lat/MacOBlox | git@github.com:aubree-lat/MacOBlox.git | \
-    ssh://git@github.com/aubree-lat/MacOBlox | ssh://git@github.com/aubree-lat/MacOBlox.git | \
-    https://github.com/CiderHQ-org/Cider | https://github.com/CiderHQ-org/Cider.git | \
-    git@github.com:CiderHQ-org/Cider | git@github.com:CiderHQ-org/Cider.git | \
-    ssh://git@github.com/CiderHQ-org/Cider | ssh://git@github.com/CiderHQ-org/Cider.git)
-      git -C "$DIR" remote set-url origin "$REPO" ;;
-  esac
-}
-
 do_install() {
-  local legacy=''
-  if [[ ! -e $DIR ]] && legacy=$(existing_checkout); then
-    say "Migrating the existing ${legacy##*/} checkout to QuadraHQ"
-    mv -T --no-clobber -- "$legacy" "$DIR"
-    [[ ! -e $legacy ]] || die "Quadra's destination appeared during migration; no files were replaced."
-  fi
   [[ ! -e $DIR ]] || { [[ -d $DIR/.git ]] && launcher_package "$DIR" >/dev/null; } ||
     die "$DIR already exists without a Git checkout. Move it aside before installing."
   step 1 "Check what the launcher needs"
   check_requirements
-  migrate_user_directories
 
-  step 2 "Prepare Quadra"
+  step 2 "Prepare Quadra Lite"
   if [[ -d $DIR/.git ]]; then
-    say "Updating Quadra"
-
-    migrate_origin_remote
+    say "Updating Quadra Lite"
 
     # Fetch first, then preserve local repairs before replacing tracked files.
     # Session data, downloads and backups stay in the checkout unchanged.
@@ -239,14 +178,11 @@ do_install() {
     git -C "$DIR" config remote.origin.partialclonefilter blob:none
     git -C "$DIR" fetch --filter=blob:none origin main
     backup_checkout_changes
-    configure_launcher_checkout
     git -C "$DIR" reset --hard origin/main
 
   else
-    say "Downloading Quadra"
-    git clone --filter=blob:none --no-checkout --depth 1 --single-branch --branch main "$REPO" "$DIR"
-    configure_launcher_checkout
-    git -C "$DIR" reset --hard HEAD
+    say "Downloading Quadra Lite"
+    git clone --filter=blob:none --depth 1 --single-branch --branch main "$REPO" "$DIR"
   fi
   step 3 "Add the launcher to your desktop"
   "$DIR/launcher/install.sh"
@@ -255,31 +191,22 @@ do_install() {
 
 # ---------------------------------------------------------------- uninstall
 
-# The launcher's Python package in a checkout: launcher/quadra, or
-# launcher/macoblox in a checkout from before the rename. Its core is the
-# folder core/, or core.py in a checkout from before core was split up.
+# The launcher's Python package in a checkout.
 launcher_package() {
-  local name
-  for name in quadra macoblox; do
-    if [[ -f $1/launcher/$name/core/__init__.py || -f $1/launcher/$name/core.py ]]; then
-      printf '%s' "$1/launcher/$name"
-      return 0
-    fi
-  done
+  if [[ -f $1/launcher/quadra/core/__init__.py ]]; then
+    printf '%s' "$1/launcher/quadra"
+    return 0
+  fi
   return 1
 }
 
 # The checkout this script makes: nothing is deleted unless $DIR is one.
 existing_checkout() {
-  local checkout
-  for checkout in "$DIR" "$LEGACY_CIDER_DIR" "$LEGACY_DIR"; do
-    if [[ -f $checkout/build_debug_shim.sh ]] && launcher_package "$checkout" >/dev/null &&
-       [[ -f $checkout/launcher/quadrahq-launcher || -f $checkout/launcher/ciderhq-launcher ||
-          -f $checkout/launcher/macoblox-launcher ]]; then
-      printf '%s' "$checkout"
-      return 0
-    fi
-  done
+  if [[ -f $DIR/build_debug_shim.sh ]] && launcher_package "$DIR" >/dev/null &&
+     [[ -f $DIR/launcher/quadralite-launcher ]]; then
+    printf '%s' "$DIR"
+    return 0
+  fi
   return 1
 }
 is_installed() {
@@ -297,12 +224,11 @@ installed_version() {
 do_uninstall() {
   local purge=${1:-}
   if [[ ! -e $DIR ]]; then
-    DIR=$(existing_checkout) || DIR=$DATA_HOME/QuadraHQ
+    DIR=$(existing_checkout) || DIR=$DATA_HOME/QuadraLite
   fi
   if [[ -e $DIR ]] && ! [[ -f $DIR/build_debug_shim.sh &&
-      ( -f $DIR/launcher/quadrahq-launcher || -f $DIR/launcher/ciderhq-launcher ||
-        -f $DIR/launcher/macoblox-launcher ) ]]; then
-    die "$DIR does not look like Quadra, so it is left alone."
+      -f $DIR/launcher/quadralite-launcher ]]; then
+    die "$DIR does not look like Quadra Lite, so it is left alone."
   fi
   # Nothing in the prefix may change under a running Darling (it keeps
   # showing deleted files), and nothing should run from the folder that goes.
@@ -314,57 +240,31 @@ do_uninstall() {
     say "Removing the launcher and Roblox (${DIR/#$HOME/\~})"
     rm -rf -- "$DIR"
   fi
-  say "Removing the app menu entries, icons and the quadrahq command"
+  say "Removing the app menu entries, icons and the quadralite command"
   local apps=$DATA_HOME/applications
-  rm -f -- "$apps/org.quadrahq.Quadra.desktop" "$apps/org.quadrahq.Quadra.URI.desktop" \
-    "$apps/quadrahq-roblox-window.desktop" \
-    "$DATA_HOME"/icons/hicolor/*/apps/quadrahq.png \
-    "$DATA_HOME/icons/hicolor/scalable/apps/quadrahq.svg"
-  # Only Quadra's own CiderDarling entry; a user's entry of that name stays.
-  local cider_entry=$apps/org.quadrahq.Quadra.CiderDarling.desktop
-  if [[ -f $cider_entry && ! -L $cider_entry ]] && grep -qsx 'X-QuadraHQ-Managed=true' "$cider_entry"; then
+  rm -f -- "$apps/io.github.schlabbadabadoo.QuadraLite.desktop" \
+    "$apps/io.github.schlabbadabadoo.QuadraLite.URI.desktop" \
+    "$apps/quadralite-roblox-window.desktop" \
+    "$DATA_HOME"/icons/hicolor/*/apps/quadralite.png \
+    "$DATA_HOME/icons/hicolor/scalable/apps/quadralite.svg"
+  # Only our own CiderDarling entry; a user's entry of that name stays.
+  local cider_entry=$apps/io.github.schlabbadabadoo.QuadraLite.CiderDarling.desktop
+  if [[ -f $cider_entry && ! -L $cider_entry ]] && grep -qsx 'X-QuadraLite-Managed=true' "$cider_entry"; then
     rm -f -- "$cider_entry"
   fi
-  local cider_link=$HOME/.local/bin/quadrahq
-  if [[ -L $cider_link && $(readlink "$cider_link") == */quadrahq-launcher ]]; then
+  local cider_link=$HOME/.local/bin/quadralite
+  if [[ -L $cider_link && $(readlink "$cider_link") == */quadralite-launcher ]]; then
     rm -f -- "$cider_link"
   fi
-  rm -f -- "$apps/org.ciderhq.Cider.desktop" "$apps/org.ciderhq.Cider.URI.desktop" \
-    "$apps/org.ciderhq.Cider.Studio.desktop" "$apps/ciderhq-roblox-window.desktop" \
-    "$DATA_HOME"/icons/hicolor/*/apps/ciderhq.png \
-    "$DATA_HOME/icons/hicolor/scalable/apps/ciderhq.svg" "$DATA_HOME/mime/packages/org.ciderhq.Cider.xml"
-  local old_entry=$apps/org.ciderhq.Cider.CiderDarling.desktop old_link=$HOME/.local/bin/ciderhq
-  if [[ -f $old_entry && ! -L $old_entry ]] && grep -qsx 'X-CiderHQ-Managed=true' "$old_entry"; then
-    rm -f -- "$old_entry"
-  fi
-  if [[ -L $old_link && $(readlink "$old_link") == */ciderhq-launcher ]]; then
-    rm -f -- "$old_link"
-  fi
-  # The xyz.narez.* names are the app ID before 0.15.
-  rm -f -- "$apps/wtf.aubree.MacOBlox.desktop" "$apps/wtf.aubree.MacOBlox.URI.desktop" \
-    "$apps/wtf.aubree.MacOBlox.Studio.desktop" \
-    "$apps/xyz.narez.MacOBlox.desktop" "$apps/xyz.narez.MacOBlox.Studio.desktop" \
-    "$apps/macoblox-roblox-window.desktop" "$apps/org.macoblox.Launcher.desktop" \
-    "$DATA_HOME"/icons/hicolor/*/apps/macoblox.png "$DATA_HOME/mime/packages/wtf.aubree.MacOBlox.xml" \
-    "$DATA_HOME/mime/packages/xyz.narez.MacOBlox.xml"
-  local link=$HOME/.local/bin/macoblox
-  if [[ -L $link && $(readlink "$link") == */macoblox-launcher ]]; then
-    rm -f -- "$link"
-  fi
-  # Quadra as the handler of Roblox links.
+  # Quadra Lite as the handler of Roblox links.
   if [[ -f $CONFIG_HOME/mimeapps.list ]]; then
-    sed -i -e 's/org\.quadrahq\.Quadra\.URI\.desktop;\{0,1\}//g' \
-      -e 's/org\.ciderhq\.Cider\.Studio\.desktop;\{0,1\}//g' \
-      -e 's/org\.ciderhq\.Cider\.URI\.desktop;\{0,1\}//g' \
-      -e 's/wtf\.aubree\.MacOBlox\.Studio\.desktop;\{0,1\}//g' \
-      -e 's/wtf\.aubree\.MacOBlox\.URI\.desktop;\{0,1\}//g' \
-      -e 's/xyz\.narez\.MacOBlox\.Studio\.desktop;\{0,1\}//g' -e '/^[^=[]*=$/d' "$CONFIG_HOME/mimeapps.list"
+    sed -i -e 's/io\.github\.schlabbadabadoo\.QuadraLite\.URI\.desktop;\{0,1\}//g' \
+      -e '/^[^=[]*=$/d' "$CONFIG_HOME/mimeapps.list"
   fi
   update-mime-database "$DATA_HOME/mime" >/dev/null 2>&1 || true
   update-desktop-database "$apps" >/dev/null 2>&1 || true
   say "Removing settings and cache"
-  rm -rf -- "$CONFIG_HOME/quadrahq" "$CACHE_HOME/quadrahq" \
-    "$CONFIG_HOME/ciderhq" "$CACHE_HOME/ciderhq" "$CONFIG_HOME/macoblox" "$CACHE_HOME/macoblox"
+  rm -rf -- "$CONFIG_HOME/quadralite" "$CACHE_HOME/quadralite"
   if [[ -n $purge && -e $PREFIX ]]; then
     [[ $PREFIX == "$HOME"/?* ]] || die "Darling's prefix $PREFIX is not in your home folder, so it is left alone."
     say "Removing Darling's prefix (${PREFIX/#$HOME/\~}), with your Roblox sign-in"
@@ -372,7 +272,7 @@ do_uninstall() {
   fi
   # Rosemary and its Roblox client live in the user data folder, outside the
   # checkout, like Darling's prefix: kept unless asked.
-  local rosemary_data=$DATA_HOME/quadrahq
+  local rosemary_data=$DATA_HOME/quadralite
   if [[ -n $purge && -d $rosemary_data ]]; then
     [[ $rosemary_data == "$HOME"/?* ]] || die "Rosemary's folder $rosemary_data is not in your home folder, so it is left alone."
     say "Removing Rosemary and its Roblox client (${rosemary_data/#$HOME/\~})"
@@ -380,7 +280,7 @@ do_uninstall() {
   elif [[ -d $rosemary_data ]]; then
     say "Rosemary's files stay in ${rosemary_data/#$HOME/\~}; --purge removes them."
   fi
-  say "Quadra is uninstalled."
+  say "Quadra Lite is uninstalled."
   if command -v "$DARLING_EXECUTABLE" >/dev/null; then
     printf '    %s%s stays installed.%s\n' "$DIM" "$(darling_runtime_name)" "$RESET"
   fi
@@ -409,7 +309,7 @@ menu_close() {
 }
 
 banner() {
-  printf '\n  %sQUADRA%s\n  quadrahq.org\n' "$BOLD" "$RESET"
+  printf '\n  %sQUADRA LITE%s\n  github.com/Schlabbadabadoo/Quadra-Lite\n' "$BOLD" "$RESET"
 }
 
 # choose TEXT ITEM...: a menu of "label|hint" items below TEXT (printf %b).
@@ -479,21 +379,21 @@ choose() {
 menu_main() {
   local text first="Start setup|Review what will be installed"
   if is_installed; then
-    text="  ${BOLD}Welcome back to Quadra${RESET}
+    text="  ${BOLD}Welcome back to Quadra Lite${RESET}
 
   ${GOOD}${ON}${RESET} Version $(installed_version) is installed.
   Keep your launcher up to date.
   ${DIM}${DIR/#$HOME/\~}${RESET}"
-    first="Update Quadra|Review the update plan"
+    first="Update Quadra Lite|Review the update plan"
   else
-    text="  ${BOLD}Welcome to Quadra${RESET}
+    text="  ${BOLD}Welcome to Quadra Lite${RESET}
   ${DIM}First setup · 1 of 3${RESET}
 
   Play the macOS Roblox client on your Linux desktop.
   This installs the launcher only. When you open it, it helps you choose
-  a theme and Rosemary or Darling, then installs Roblox and signs you in."
+  Rosemary or Darling, then installs Roblox and signs you in."
   fi
-  choose "$text" "$first" "Uninstall|Remove Quadra from this computer" "Quit|"
+  choose "$text" "$first" "Uninstall|Remove Quadra Lite from this computer" "Quit|"
 }
 
 menu_install() {
@@ -504,15 +404,15 @@ menu_install() {
 
 $(setup_plan)" "Continue|Confirm this setup plan" "Back|Return to the welcome screen"
     [[ $CHOICE == 0 ]] || return 1
-    choose "  ${BOLD}Ready to ${operation,,} Quadra${RESET}
+    choose "  ${BOLD}Ready to ${operation,,} Quadra Lite${RESET}
   ${DIM}Setup · 3 of 3${RESET}
 
   Destination: ${DIR/#$HOME/\~}
   Setup downloads the launcher and adds it to your app menu.
-  When you open Quadra, it guides you through the rest.
+  When you open Quadra Lite, it guides you through the rest.
 
   ${DIM}Begin when you're ready.${RESET}" \
-      "$operation Quadra|Begin setup" "Back|Review the plan again"
+      "$operation Quadra Lite|Begin setup" "Back|Review the plan again"
     case $CHOICE in
       0) return 0 ;;
       1) ;;
@@ -527,11 +427,11 @@ menu_uninstall() {
   local where=${DIR/#$HOME/\~} prefix=${PREFIX/#$HOME/\~}
   choose "  ${BOLD}Uninstall removes${RESET}
     ${BULLET} $where (the launcher and Roblox)
-    ${BULLET} the app menu entries, icons and the quadrahq command
+    ${BULLET} the app menu entries, icons and the quadralite command
     ${BULLET} settings and cache
 
   ${DIM}Darling stays installed. Its prefix, $prefix, holds your Roblox sign-in.
-  Rosemary's files, ${DATA_HOME/#$HOME/\~}/quadrahq, stay too.${RESET}" \
+  Rosemary's files, ${DATA_HOME/#$HOME/\~}/quadralite, stay too.${RESET}" \
     "Uninstall|keep $prefix and Rosemary's files" "Uninstall everything|also delete $prefix and Rosemary's files" "Back|"
   case $CHOICE in
     0)
@@ -553,25 +453,22 @@ menu_uninstall() {
 
 usage() {
   cat <<USAGE
-Quadra installer
+Quadra Lite installer
 
   install.sh               a menu in a terminal; without one, install or update
   install.sh --install     review the setup plan, then install or update
   install.sh --update      same as --install
   install.sh --install --yes
                            install or update without setup prompts
-  install.sh --uninstall   remove Quadra (asks first, unless --yes)
+  install.sh --uninstall   remove Quadra Lite (asks first, unless --yes)
   install.sh --uninstall --purge
                            also delete the selected Darling prefix (Roblox sign-in)
                            and Rosemary's files, including its Roblox client
 
-With curl, options go after "bash -s --":
-  curl -fsSL https://quadrahq.org/install.sh | bash -s -- --uninstall
-
 This installs the launcher only; it needs git, Python 3, GTK 4 and libadwaita.
-Quadra's first-boot screen chooses the theme and the runtime (Rosemary or
-Darling) and installs them. Darling's tools are installed by install-runtime.sh
-in Quadra's folder, which that screen runs for you.
+Quadra Lite's first-boot screen chooses the runtime (Rosemary or Darling) and
+installs it. Darling's tools are installed by install-runtime.sh in Quadra
+Lite's folder, which that screen runs for you.
 USAGE
 }
 
@@ -588,7 +485,7 @@ main() {
         usage
         return 0 ;;
       --backend | --backend=* | --darling | --darling=* | --install-runtime)
-        die "$arg moved: Quadra's first-boot screen chooses the runtime, and ${DIR/#$HOME/\~}/install-runtime.sh installs Darling." ;;
+        die "$arg moved: Quadra Lite's first-boot screen chooses the runtime, and ${DIR/#$HOME/\~}/install-runtime.sh installs Darling." ;;
       *) die "Unknown option: $arg (see --help)" ;;
     esac
     shift
@@ -628,7 +525,7 @@ main() {
     banner
   elif [[ $action == uninstall && -z $assume_yes ]]; then
     [[ -n $terminal ]] || die "Not uninstalling without a terminal to ask in; add --yes."
-    local answer='' what="Quadra"
+    local answer='' what="Quadra Lite"
     [[ -n $PURGE ]] && what+=" and Darling's prefix ${PREFIX/#$HOME/\~}"
     printf 'Remove %s? [y/N] ' "$what"
     IFS= read -r answer || true

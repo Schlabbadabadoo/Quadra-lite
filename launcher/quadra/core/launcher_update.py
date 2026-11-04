@@ -11,7 +11,6 @@ from . import builds, config, locations
 
 __all__ = [
     "LAUNCHER_RELEASE_URL",
-    "LAUNCHER_SPARSE_PATTERNS",
     "RELEASES_URL",
     "REPO_URL",
     "_git",
@@ -20,18 +19,9 @@ __all__ = [
     "update_launcher",
 ]
 
-REPO_URL = "https://github.com/QuadraHQ/Quadra.git"
-RELEASES_URL = "https://github.com/QuadraHQ/Quadra/releases/latest"
-LAUNCHER_RELEASE_URL = "https://api.github.com/repos/QuadraHQ/Quadra/releases/latest"
-# Keep these patterns aligned with install.sh. Hosting files stay on main,
-# while partial app fetches only materialize blobs selected by this checkout.
-LAUNCHER_SPARSE_PATTERNS = """/*
-!/website/
-!/.github/
-!/vercel.json
-!/.vercel/
-!/.vercelignore
-"""
+REPO_URL = "https://github.com/Schlabbadabadoo/Quadra-Lite.git"
+RELEASES_URL = "https://github.com/Schlabbadabadoo/Quadra-Lite/releases/latest"
+LAUNCHER_RELEASE_URL = "https://api.github.com/repos/Schlabbadabadoo/Quadra-Lite/releases/latest"
 
 
 def parse_version_tuple(ver):
@@ -63,52 +53,20 @@ def _git(*args, input=None):
 
 
 def update_launcher(progress=None):
-    """Updates Quadra the way install.sh does: pulls the checkout
+    """Updates Quadra Lite the way install.sh does: pulls the checkout
     (fast-forward only, so a failed update never leaves a half merge),
     rebuilds Darling's shim when Darling is chosen and reinstalls the menu
-    entries. Returns (True,
-    message), or (False, release page) when this is not a git checkout
-    (Flatpak, packages)."""
+    entries. Returns (True, message), or (False, release page) when this is
+    not a git checkout."""
     if not (locations.PROJECT / ".git").is_dir():
         return False, RELEASES_URL
     if progress:
         progress(0.2, _("Pulling latest version…"))
-    # Match the installer's migration of recognized legacy repository URLs.
-    origin = _git("remote", "get-url", "origin").stdout.strip()
-    legacy_remotes = {
-        "https://github.com/narezy/MacOBlox",
-        "https://github.com/narezy/MacOBlox.git",
-        "https://github.com/aubree-lat/MacOBlox",
-        "https://github.com/aubree-lat/MacOBlox.git",
-        "git@github.com:aubree-lat/MacOBlox",
-        "git@github.com:aubree-lat/MacOBlox.git",
-        "ssh://git@github.com/aubree-lat/MacOBlox",
-        "ssh://git@github.com/aubree-lat/MacOBlox.git",
-        "https://github.com/CiderHQ-org/Cider",
-        "https://github.com/CiderHQ-org/Cider.git",
-        "git@github.com:CiderHQ-org/Cider",
-        "git@github.com:CiderHQ-org/Cider.git",
-        "ssh://git@github.com/CiderHQ-org/Cider",
-        "ssh://git@github.com/CiderHQ-org/Cider.git",
-    }
-    if origin in legacy_remotes:
-        result = _git("remote", "set-url", "origin", REPO_URL)
-        if result.returncode:
-            raise RuntimeError(
-                _(
-                    "Could not update the files in {path}:\n{output}",
-                    path=locations.PROJECT,
-                    output=(result.stderr or result.stdout).strip(),
-                )
-            )
-    for arguments, patterns in (
-        (("config", "remote.origin.promisor", "true"), None),
-        (("config", "remote.origin.partialclonefilter", "blob:none"), None),
-        (("sparse-checkout", "set", "--no-cone", "--stdin"), LAUNCHER_SPARSE_PATTERNS),
-        (("fetch", "--filter=blob:none", "origin", "main"), None),
-        (("merge", "--ff-only", "origin/main"), None),
+    for arguments in (
+        ("fetch", "--filter=blob:none", "origin", "main"),
+        ("merge", "--ff-only", "origin/main"),
     ):
-        result = _git(*arguments, input=patterns)
+        result = _git(*arguments)
         if result.returncode != 0:
             raise RuntimeError(
                 _(

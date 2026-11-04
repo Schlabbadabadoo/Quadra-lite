@@ -16,7 +16,7 @@ from quadra import core, ui
 from gi.repository import Adw, Gio, Gtk
 
 saved, shown = [], []
-application = Adw.Application(application_id="org.quadrahq.Quadra.VRWarningTest",
+application = Adw.Application(application_id="io.github.schlabbadabadoo.QuadraLite.VRWarningTest",
                               flags=Gio.ApplicationFlags.NON_UNIQUE)
 application.register(None)
 

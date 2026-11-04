@@ -511,7 +511,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         notification.set_body(
             _("Your server is located in {location}").format(location=location)
         )
-        notification.set_icon(Gio.ThemedIcon.new("quadrahq"))
+        notification.set_icon(Gio.ThemedIcon.new("quadralite"))
         # One id: a new server replaces the previous notification.
         self.get_application().send_notification("server-location", notification)
 

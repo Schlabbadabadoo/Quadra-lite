@@ -24,7 +24,7 @@ from quadra import core, theme, ui
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
 Gtk.init()
-application = Adw.Application(application_id="org.quadrahq.Quadra.AppearanceTest",
+application = Adw.Application(application_id="io.github.schlabbadabadoo.QuadraLite.AppearanceTest",
                               flags=Gio.ApplicationFlags.NON_UNIQUE)
 application.register(None)
 icons = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())

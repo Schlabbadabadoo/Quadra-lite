@@ -1,4 +1,4 @@
-"""Quadra launcher command line."""
+"""Quadra Lite launcher command line."""
 
 import sys
 
@@ -23,14 +23,14 @@ def main(argv=None):
 
     if argv[:1] == ["--uri"]:
         if len(argv) != 2:
-            print("quadrahq --uri requires one URI", file=sys.stderr)
+            print("quadralite --uri requires one URI", file=sys.stderr)
             return 2
         from quadra import uri
 
         uri.receive(argv[1])
 
-    # `quadrahq --collect-diagnostics [options]` writes a report archive without
-    # the interface (see `quadrahq --collect-diagnostics --help`).
+    # `quadralite --collect-diagnostics [options]` writes a report archive without
+    # the interface (see `quadralite --collect-diagnostics --help`).
     if argv[:1] == ["--collect-diagnostics"]:
         try:
             from quadra import diagnostics
@@ -42,8 +42,8 @@ def main(argv=None):
             return 1
         return diagnostics.collect_cli(argv[1:])
 
-    # `quadrahq --watch-stalls` records what the game's threads do while it hangs
-    # (see `quadrahq --watch-stalls --help`); start it before or during the game.
+    # `quadralite --watch-stalls` records what the game's threads do while it hangs
+    # (see `quadralite --watch-stalls --help`); start it before or during the game.
     if argv[:1] == ["--watch-stalls"]:
         from quadra.darling import stallwatch
 
@@ -54,14 +54,14 @@ def main(argv=None):
 
         return hardware_report.cli(argv[1:])
 
-    # `quadrahq --ciderdarling-settings` opens Settings -> CiderDarling, also in an
+    # `quadralite --ciderdarling-settings` opens Settings -> CiderDarling, also in an
     # already running launcher (the CiderDarling Settings menu entry).
     page = None
     if argv[:1] == ["--ciderdarling-settings"]:
         page = "ciderdarling"
 
-    # `quadrahq --settings` opens the settings window (also in a running Quadra);
-    # plain `quadrahq` starts Roblox straight away behind a small splash.
+    # `quadralite --settings` opens the settings window (also in a running Quadra);
+    # plain `quadralite` starts Roblox straight away behind a small splash.
     open_settings = argv[:1] == ["--settings"]
 
     from quadra.ui import main as ui_main

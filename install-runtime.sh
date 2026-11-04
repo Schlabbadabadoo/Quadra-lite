@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Quadra's Darling installer: the system tools Darling needs, and Darling
-# itself (regular Darling, or QuadraHQ's CiderDarling). Quadra's first-boot
+# Quadra Lite's Darling installer: the system tools Darling needs, and Darling
+# itself (regular Darling, or QuadraHQ's CiderDarling). Quadra Lite's first-boot
 # screen and its settings open it in a terminal, so system packages can ask
 # for your sudo password. Rosemary needs none of this: Quadra downloads it.
 #
@@ -16,10 +16,9 @@ DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
 CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 CACHE_HOME=${XDG_CACHE_HOME:-$HOME/.cache}
 PREFIX=${DPREFIX:-$HOME/.darling}
-# Darling's Debian packages, pinned to the release the Flatpak uses
-# (flatpak/org.quadrahq.Quadra.yml; change both together). The checksum makes
-# sure the download is that release, and a new Darling release cannot break
-# installs before the shim was tested with it.
+# Darling's Debian packages, pinned to the release the shim is tested with.
+# The checksum makes sure the download is that release, and a new Darling
+# release cannot break installs before the shim was tested with it.
 DARLING_TAG=v0.1.20260608
 DARLING_DEBS_SHA256=27469ef3932da2e91dd7fb34b70e3628a3e54b7af9fb5480051f44af35eca1fd
 CIDER_DARLING_REPO=https://github.com/QuadraHQ/CiderDarling.git
@@ -30,7 +29,7 @@ CIDER_DARLING_MANIFEST=009cf8db2cfc409ceaafb602dac3ee0744e987396eb544e1361bc8691
 CIDER_DARLING_INSTALL=/opt/ciderdarling/$CIDER_DARLING_REVISION
 # SHA-256 of the pinned revision's prebuilt archives (CiderDarling's CI release
 # bin-<12 hex digits>), by distribution family; empty: build from source.
-# packaging/pin-ciderdarling.py sets these lines with the two above.
+# Keep these in step with the pinned revision above.
 CIDER_DARLING_PREBUILT_ARCH=''
 CIDER_DARLING_PREBUILT_UBUNTU2404=''
 CIDER_DARLING_RELEASES=https://github.com/QuadraHQ/CiderDarling/releases/download
@@ -76,7 +75,7 @@ darling_runtime_name() {
 migrate_user_directories() {
   local base target source old
   for base in "$CONFIG_HOME" "$CACHE_HOME" "$DATA_HOME"; do
-    target=$base/quadrahq
+    target=$base/quadralite
     if [[ -e $target || -L $target ]]; then
       # Keep existing Quadra data; an empty directory may be replaced.
       [[ -d $target ]] && rmdir -- "$target" 2>/dev/null || continue
@@ -93,7 +92,7 @@ migrate_user_directories() {
 
 load_darling_selection() {
   migrate_user_directories
-  local saved='' file=$CONFIG_HOME/quadrahq/runtime.json
+  local saved='' file=$CONFIG_HOME/quadralite/runtime.json
   if [[ -f $file ]]; then
     command -v python3 >/dev/null || die "Python 3 is needed to read the saved Darling selection."
     saved=$(python3 - "$file" "$DARLING_RUNTIME" <<'PY'
@@ -159,7 +158,7 @@ save_darling_selection() {
   # With "remember" (a runtime-only install), only an update of the active
   # variant changes the selection; another variant is just remembered, and
   # nothing is written before a first selection exists.
-  python3 - "${1:-activate}" "$CONFIG_HOME/quadrahq/runtime.json" "$DARLING_RUNTIME" "$DARLING_EXECUTABLE" "$DARLING_SYSROOT" "$PREFIX" <<'PY'
+  python3 - "${1:-activate}" "$CONFIG_HOME/quadralite/runtime.json" "$DARLING_RUNTIME" "$DARLING_EXECUTABLE" "$DARLING_SYSROOT" "$PREFIX" <<'PY'
 import json
 import os
 from pathlib import Path
@@ -685,18 +684,18 @@ build_darling_source() {
     runtime_options=(-DENABLE_METAL=OFF -DCIDER_APPLY_PATCHES=ON -DCIDER_SHUTDOWN_ON_INSTALL=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo)
   fi
   install_darling_build_dependencies "$manager" || die "Could not install Darling build dependencies. Check enabled repositories and package names for your distro, then rerun."
-  mkdir -p -- "$CACHE_HOME/quadrahq/installer"
+  mkdir -p -- "$CACHE_HOME/quadralite/installer"
   # Every build starts from a fresh tree, so earlier ones (kept by older
   # installers, or left by a failed build) only take disk space: several GB.
   local old_build
-  for old_build in "$CACHE_HOME/quadrahq/installer"/darling-source-*; do
+  for old_build in "$CACHE_HOME/quadralite/installer"/darling-source-*; do
     [[ -d $old_build && ! -L $old_build ]] || continue
     say "Removing earlier build files: ${old_build/#$HOME/\~}"
     rm -rf -- "$old_build" || say "Could not remove all of $old_build; continuing."
   done
-  build=$(umask 077; mktemp -d "$CACHE_HOME/quadrahq/installer/darling-source-XXXXXX")
+  build=$(umask 077; mktemp -d "$CACHE_HOME/quadralite/installer/darling-source-XXXXXX")
   # The log lives next to the tree, which is removed after a successful install.
-  log=$(umask 077; mktemp "$CACHE_HOME/quadrahq/installer/darling-build-$(date -u +%Y%m%d-%H%M%S)-XXXXXX.log")
+  log=$(umask 077; mktemp "$CACHE_HOME/quadralite/installer/darling-build-$(date -u +%Y%m%d-%H%M%S)-XXXXXX.log")
   # The launcher's runtime installer shows the end of this log on failure.
   [[ -z ${CIDER_RUNTIME_LOG_RECORD:-} ]] || printf '%s\n' "$log" > "$CIDER_RUNTIME_LOG_RECORD" || true
   say "Building $(darling_runtime_name); sources: $build"
@@ -790,14 +789,14 @@ resolve_ciderdarling_release() {
   local -a values=()
   if [[ -z $file ]]; then
     [[ -z $CIDER_DARLING_PINNED ]] || return 0
-    mkdir -p -- "$CACHE_HOME/quadrahq/installer"
-    downloaded=$(umask 077; mktemp "$CACHE_HOME/quadrahq/installer/.release-XXXXXX")
+    mkdir -p -- "$CACHE_HOME/quadralite/installer"
+    downloaded=$(umask 077; mktemp "$CACHE_HOME/quadralite/installer/.release-XXXXXX")
     if command -v curl >/dev/null && curl -fsSL --connect-timeout 4 --max-time 12 \
       "$CIDER_DARLING_UPDATE_URL" -o "$downloaded"; then
       file=$downloaded
     else
       rm -f -- "$downloaded"
-      file=$CACHE_HOME/quadrahq/runtime-release.json
+      file=$CACHE_HOME/quadralite/runtime-release.json
       [[ -f $file ]] || { say "Runtime update service unavailable; using Quadra's bundled runtime pin."; return 0; }
     fi
   fi
@@ -966,7 +965,7 @@ ciderdarling_client_is_setuid_root() {
 
 download_ciderdarling_archive() {
   local output=$1 name=$2 url=$3 digest=$4 folder part
-  folder=$CACHE_HOME/quadrahq/installer/downloads
+  folder=$CACHE_HOME/quadralite/installer/downloads
   mkdir -p -- "$folder"
   chmod 700 -- "$folder"
   part=$folder/$name.tar.xz.part
@@ -1014,8 +1013,8 @@ try_ciderdarling_prebuilt() {
   fi
   name=ciderdarling-$CIDER_DARLING_REVISION-x86_64-$flavor
   url=$CIDER_DARLING_RELEASES/bin-${CIDER_DARLING_REVISION:0:12}
-  mkdir -p -- "$CACHE_HOME/quadrahq/installer"
-  work=$(umask 077; mktemp -d "$CACHE_HOME/quadrahq/installer/prebuilt-XXXXXX")
+  mkdir -p -- "$CACHE_HOME/quadralite/installer"
+  work=$(umask 077; mktemp -d "$CACHE_HOME/quadralite/installer/prebuilt-XXXXXX")
   say "Downloading prebuilt CiderDarling ${CIDER_DARLING_REVISION:0:12} ($flavor)"
   if ! curl -fsSL --retry 3 --connect-timeout 15 -o "$work/$name.json" "$url/$name.json"; then
     rm -rf -- "$work"
@@ -1178,7 +1177,7 @@ do_setup() {
 
 usage() {
   cat <<USAGE
-Quadra's Darling installer
+Quadra Lite's Darling installer
 
   install-runtime.sh --darling regular
                            install the system tools and regular Darling,
@@ -1200,7 +1199,7 @@ Quadra's Darling installer
                            remove an interrupted CiderDarling installation without
                            asking, then build it again
 
-Quadra's first-boot screen and its settings run this in a terminal. Rosemary
+Quadra Lite's first-boot screen and its settings run this in a terminal. Rosemary
 needs none of it. DARLING_BUILD_JOBS defaults to auto: available CPU threads
 capped by memory headroom; set a positive count to override.
 USAGE

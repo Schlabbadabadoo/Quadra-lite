@@ -186,7 +186,7 @@ class SetupWizard(Adw.Bin):
         page, body = self._page(
             "Welcome to Quadra", "Play Roblox on your Linux desktop."
         )
-        logo = theme.Logo(core.ICONS / "quadrahq-128.png", 88)
+        logo = theme.Logo(core.ICONS / "quadralite-128.png", 88)
         logo.set_halign(Gtk.Align.CENTER)
         body.prepend(logo)
         body.append(

@@ -63,7 +63,7 @@ class RuntimeSelectionTests(unittest.TestCase):
 
     def test_flatpak_ignores_host_choice_and_invalid_host_configuration(self):
         self.selection.write_text("invalid")
-        resolved = self.resolve(FLATPAK_ID="org.quadrahq.Quadra")
+        resolved = self.resolve(FLATPAK_ID="io.github.schlabbadabadoo.QuadraLite")
         self.assertEqual(resolved["sysroot"], "/app/libexec/darling")
         self.assertEqual(resolved["executable"], str(self.stock / "bin/darling"))
 
@@ -96,7 +96,7 @@ class RuntimeSelectionTests(unittest.TestCase):
         self.assertFalse(runtime.is_bundled({}))
 
     def test_flatpak_keeps_its_runtime_if_nix_bundle_environment_is_inherited(self):
-        resolved = self.resolve(FLATPAK_ID='org.quadrahq.Quadra', QUADRA_BUNDLED_DARLING=str(self.cider))
+        resolved = self.resolve(FLATPAK_ID='io.github.schlabbadabadoo.QuadraLite', QUADRA_BUNDLED_DARLING=str(self.cider))
         self.assertEqual(resolved['sysroot'], '/app/libexec/darling')
 
     def test_malformed_unknown_and_relative_configuration_rejected(self):
@@ -175,7 +175,7 @@ class RuntimeSelectionTests(unittest.TestCase):
 
     def test_flatpak_has_no_host_runtime_switches(self):
         self.install_cider_metadata()
-        self.assertEqual(self.discover(FLATPAK_ID="org.quadrahq.Quadra"), {})
+        self.assertEqual(self.discover(FLATPAK_ID="io.github.schlabbadabadoo.QuadraLite"), {})
 
     def test_roundtrip_switch_preserves_both_custom_prefixes(self):
         self.install_cider_metadata()

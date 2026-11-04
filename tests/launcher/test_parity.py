@@ -286,7 +286,7 @@ class RunnerChoiceTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
-        root = Path(self.tmp.name) / "quadrahq" / "rosemary-runner"
+        root = Path(self.tmp.name) / "quadralite" / "rosemary-runner"
         for name in ("0.5.0", "0.5.0-quadra.1", "0.5.0-quadra.10", "0.5.0-quadra.2", "0.4.1"):
             program = root / name / "squashfs-root" / "bin" / "rosemary"
             program.parent.mkdir(parents=True)
@@ -316,7 +316,7 @@ class RunnerChoiceTests(unittest.TestCase):
         self.assertIn("quadra.10", str(runtime.find_rosemary({})))          # default is Quadra's
 
     def test_another_installed_build_still_runs_when_the_chosen_one_is_missing(self):
-        for path in list((Path(self.tmp.name) / "quadrahq" / "rosemary-runner").glob("*quadra*")):
+        for path in list((Path(self.tmp.name) / "quadralite" / "rosemary-runner").glob("*quadra*")):
             import shutil
             shutil.rmtree(path)
         self.assertIn("/0.5.0/", str(runtime.find_rosemary({"rosemary_source": "quadra"})))

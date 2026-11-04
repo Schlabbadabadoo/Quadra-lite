@@ -76,83 +76,6 @@ printf '%s|%s|%s|%s' "$CIDER_DARLING_REVISION" "$CIDER_DARLING_INSTALL" "$CIDER_
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         return result.stdout
 
-    def test_rebrand_keeps_saved_cider_runtime_and_settings(self):
-        directory = self.base / 'config/ciderhq'
-        original = {'schema_version': 1, 'runtime': 'regular',
-                    'executable': '/fixture/bin/darling', 'sysroot': '/fixture/libexec/darling',
-                    'prefix': str(self.base / 'signed-in-prefix')}
-        runtime.save_selection(original, directory / 'runtime.json')
-        saved = (directory / 'runtime.json').read_bytes()
-        (directory / 'settings.json').write_text('private settings')
-        output = self.checked('load_darling_selection; printf "%s|%s" "$DARLING_RUNTIME" "$PREFIX"')
-        self.assertEqual(output, f'regular|{self.base}/signed-in-prefix')
-        target = self.base / 'config/quadrahq'
-        self.assertEqual((target / 'runtime.json').read_bytes(), saved)
-        self.assertEqual((target / 'settings.json').read_text(), 'private settings')
-        self.assertEqual((target / 'runtime.json').stat().st_mode & 0o777, 0o600)
-        self.assertFalse(directory.exists())
-
-    def test_rebrand_does_not_replace_existing_quadra_settings(self):
-        for name in ('quadrahq', 'ciderhq', 'macoblox'):
-            directory = self.base / 'config' / name
-            directory.mkdir(parents=True, exist_ok=True)
-            (directory / 'settings.json').write_text(name)
-        for launcher in (False, True):
-            self.checked('migrate_user_directories', launcher)
-            for name in ('quadrahq', 'ciderhq', 'macoblox'):
-                self.assertEqual((self.base / 'config' / name / 'settings.json').read_text(), name)
-
-    def test_source_checkout_migrates_from_cider_before_updating(self):
-        legacy = self.base / 'data/CiderHQ'
-        (legacy / '.git').mkdir(parents=True)
-        (legacy / 'launcher/macoblox').mkdir(parents=True)
-        for file in ('build_debug_shim.sh', 'launcher/ciderhq-launcher', 'launcher/macoblox/core.py'):
-            (legacy / file).touch()
-        (legacy / 'saved-session').write_text('keep this')
-        # Stop before checking requirements or fetching anything.
-        result = self.shell('step() { :; }; check_requirements() { return 71; }; do_install', launcher=True)
-        self.assertEqual(result.returncode, 71, result.stdout + result.stderr)
-        self.assertFalse(legacy.exists())
-        self.assertEqual((self.base / 'data/QuadraHQ/saved-session').read_text(), 'keep this')
-
-    def test_earlier_repository_urls_move_to_the_quadrahq_repository(self):
-        checkout = self.base / 'data/QuadraHQ'
-        subprocess.run(['git', 'init', '-q', str(checkout)], check=True)
-        current = 'https://github.com/QuadraHQ/Quadra.git'
-        for url, moves in [('https://github.com/CiderHQ-org/Cider.git', True),
-                           ('https://github.com/CiderHQ-org/Cider', True),
-                           ('git@github.com:CiderHQ-org/Cider.git', True),
-                           ('ssh://git@github.com/CiderHQ-org/Cider', True),
-                           ('https://github.com/narezy/MacOBlox.git', True),
-                           ('https://github.com/someone/their-fork.git', False),
-                           ('https://github.com/CiderHQ-org/CiderDarling.git', False)]:
-            with self.subTest(url=url):
-                subprocess.run(['git', '-C', str(checkout), 'remote', 'remove', 'origin'], capture_output=True)
-                subprocess.run(['git', '-C', str(checkout), 'remote', 'add', 'origin', url], check=True)
-                self.checked('migrate_origin_remote', launcher=True)
-                origin = subprocess.check_output(['git', '-C', str(checkout), 'remote', 'get-url', 'origin'], text=True)
-                self.assertEqual(origin.strip(), current if moves else url)
-
-    def test_checkout_is_recognized_with_either_package_layout(self):
-        # An existing checkout still has launcher/macoblox until this update
-        # replaces it, and core.py until core was split into a folder; the
-        # installer must not take either for a foreign directory.
-        checkout = self.base / 'data/QuadraHQ'
-        (checkout / '.git').mkdir(parents=True)
-        for package, core in (('macoblox', 'core.py'), ('quadra', 'core.py'), ('quadra', 'core/__init__.py')):
-            with self.subTest(package=package, core=core):
-                (checkout / 'launcher' / package / core).parent.mkdir(parents=True)
-                (checkout / 'launcher' / package / core).touch()
-                (checkout / 'launcher' / package / '__init__.py').write_text('__version__ = "0.36"\n')
-                self.assertEqual(self.checked(f'launcher_package "{checkout}"', launcher=True),
-                                 f'{checkout}/launcher/{package}')
-                result = self.shell('step() { :; }; check_requirements() { return 71; }; do_install', launcher=True)
-                self.assertEqual(result.returncode, 71, result.stdout + result.stderr)
-                shutil.rmtree(checkout / 'launcher' / package)
-        result = self.shell('step() { :; }; check_requirements() { return 71; }; do_install', launcher=True)
-        self.assertNotEqual(result.returncode, 71)
-        self.assertIn('without a Git checkout', result.stdout + result.stderr)
-
     def test_default_and_cli_choices_and_invalid_values(self):
         body = '''
 banner() { :; }
@@ -165,7 +88,7 @@ main '''
             self.assertNotEqual(self.shell(body + options).returncode, 0)
 
     def test_install_runtime_does_not_update_launcher_or_activate_runtime(self):
-        file = self.base / 'config/quadrahq/runtime.json'
+        file = self.base / 'config/quadralite/runtime.json'
         original = {'schema_version': 1, 'runtime': 'regular',
                     'executable': '/usr/bin/darling', 'sysroot': '/usr/libexec/darling',
                     'prefix': str(self.base / 'saved-prefix')}
@@ -215,7 +138,7 @@ DARLING_SYSROOT="$FIXTURE/runtime with spaces/libexec/darling"
 PREFIX="$FIXTURE/custom prefix"
 save_darling_selection
 ''')
-        path = self.base / "config/quadrahq/runtime.json"
+        path = self.base / "config/quadralite/runtime.json"
         self.assertEqual(path.stat().st_mode & 0o777, 0o600)
         self.assertEqual(list(path.parent.iterdir()), [path])
         output = self.checked('''
@@ -234,7 +157,7 @@ save_darling_selection
 DARLING_EXECUTABLE="$FIXTURE/new/bin/darling"; DARLING_SYSROOT="$FIXTURE/new/libexec/darling"
 save_darling_selection remember
 ''')
-        saved = runtime.read_selection(self.base / 'config/quadrahq/runtime.json')
+        saved = runtime.read_selection(self.base / 'config/quadralite/runtime.json')
         self.assertEqual(saved['previous_ciderdarling']['sysroot'], str(self.base / 'old/libexec/darling'))
         self.assertEqual(saved['previous_ciderdarling']['prefix'], saved['prefix'])
 
@@ -253,7 +176,7 @@ curl() {{
 '''
         result = self.shell(common + 'download_ciderdarling_archive "$FIXTURE/download" "$name" https://fixture/archive "$digest"')
         self.assertEqual(result.returncode, 1)
-        part = self.base / 'cache/quadrahq/installer/downloads/fixture.tar.xz.part'
+        part = self.base / 'cache/quadralite/installer/downloads/fixture.tar.xz.part'
         self.assertEqual(part.read_bytes(), b'abc')
         self.checked(common + 'download_ciderdarling_archive "$FIXTURE/download" "$name" https://fixture/archive "$digest"')
         self.assertEqual((self.base / 'download').read_bytes(), b'abcdef')
@@ -273,7 +196,7 @@ printf '%s|%s|%s' "$DARLING_EXECUTABLE" "$DARLING_SYSROOT" "$DPREFIX"
         self.assertEqual(output, f'{self.base}/runtime/bin/darling|{self.base}/runtime/libexec/darling|{self.base}/.ciderdarling')
 
     def test_gui_and_installer_preserve_both_runtime_profiles(self):
-        file = self.base / 'config/quadrahq/runtime.json'
+        file = self.base / 'config/quadralite/runtime.json'
         def entry(variant):
             return {'schema_version': 1, 'runtime': variant,
                     'executable': str(self.base / variant / 'bin/darling'),
@@ -378,7 +301,7 @@ is_installed() { return 1; }; setup_plan() { :; }
 choose() { printf '%s\\n' "${2%%|*}" >> "$FIXTURE/menu"; CHOICE=$FAKE_CHOICE; FAKE_CHOICE=0; }
 FAKE_CHOICE='''
         self.checked(body + '0\nmenu_install', launcher=True)
-        self.assertEqual((self.base / 'menu').read_text().splitlines(), ['Continue', 'Install Quadra'])
+        self.assertEqual((self.base / 'menu').read_text().splitlines(), ['Continue', 'Install Quadra Lite'])
         self.assertNotEqual(self.shell(body + '1\nmenu_install', launcher=True).returncode, 0)
 
     def test_runtime_options_point_to_the_first_boot_screen(self):
@@ -396,12 +319,12 @@ main '''
         self.assertNotIn('--backend', self.checked('usage', launcher=True))
 
     def fake_checkout(self):
-        checkout = self.base / 'data/QuadraHQ'
+        checkout = self.base / 'data/QuadraLite'
         (checkout / '.git').mkdir(parents=True)
-        (checkout / 'launcher/quadra').mkdir(parents=True)
-        (checkout / 'launcher/quadra/core.py').touch()
+        (checkout / 'launcher/quadra/core').mkdir(parents=True)
+        (checkout / 'launcher/quadra/core/__init__.py').touch()
         (checkout / 'launcher/quadra/__init__.py').write_text('__version__ = "0.42"\n')
-        (checkout / 'launcher/quadrahq-launcher').touch()
+        (checkout / 'launcher/quadralite-launcher').touch()
         for name, mark in (('build_debug_shim.sh', 'shim'), ('launcher/install.sh', 'launcher')):
             path = checkout / name
             path.write_text(f'#!/usr/bin/env bash\necho {mark} >> "$FIXTURE/log"\n')
@@ -417,8 +340,8 @@ check_requirements() { echo requirements >> "$FIXTURE/log"; }
         result = self.shell(stubs + 'do_install', launcher=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual((self.base / 'log').read_text().splitlines(), ['requirements', 'launcher'])
-        self.assertFalse((self.base / 'config/quadrahq/settings.json').exists())
-        self.assertFalse((self.base / 'config/quadrahq/runtime.json').exists())
+        self.assertFalse((self.base / 'config/quadralite/settings.json').exists())
+        self.assertFalse((self.base / 'config/quadralite/runtime.json').exists())
         self.assertIn('welcome screen', result.stdout)
         for name in ('install_tools', 'ensure_darling', 'validate_tools', 'save_darling_selection'):
             self.assertNotEqual(self.shell(f'declare -F {name}', launcher=True).returncode, 0, name)
@@ -530,7 +453,7 @@ setcap() { printf 'setcap %s\\n' "$*" >> "$FIXTURE/commands"; }
         target = self.base / 'versions' / revision
         self.assertTrue((target / 'bin/darling').is_file())
         self.assertFalse((self.base / 'versions' / f'.partial-{revision}').exists())
-        self.assertEqual(list((self.base / 'cache/quadrahq/installer').glob('prebuilt-*')), [])
+        self.assertEqual(list((self.base / 'cache/quadralite/installer').glob('prebuilt-*')), [])
         downloads = (self.base / 'downloads').read_text().split()
         self.assertEqual(downloads, [
             f'https://github.com/QuadraHQ/CiderDarling/releases/download/bin-{revision[:12]}/'
@@ -595,12 +518,12 @@ darling_literal_flags() { :; }
 cmake() { printf '%s\\n' "$@" >> "$FIXTURE/commands"; }
 sudo() { "$@"; mkdir -p "$CIDER_DARLING_INSTALL/bin"; touch "$CIDER_DARLING_INSTALL/bin/darling"; chmod 755 "$CIDER_DARLING_INSTALL/bin/darling"; }
 ciderdarling_matches() { return 0; }
-mkdir -p "$XDG_CACHE_HOME/quadrahq/installer/darling-source-earlier/build"
+mkdir -p "$XDG_CACHE_HOME/quadralite/installer/darling-source-earlier/build"
 build_darling_source apt-get
 ''', DARLING_BUILD_JOBS='7', CIDER_RUNTIME_LOG_RECORD=str(self.base / 'build-log'))
         # The build tree goes after a successful install, earlier ones before
         # a new build; the log stays where the launcher's record points.
-        installer = self.base / 'cache/quadrahq/installer'
+        installer = self.base / 'cache/quadralite/installer'
         self.assertEqual(list(installer.glob('darling-source-*')), [])
         log = Path((self.base / 'build-log').read_text().strip())
         self.assertEqual(log.parent, installer)

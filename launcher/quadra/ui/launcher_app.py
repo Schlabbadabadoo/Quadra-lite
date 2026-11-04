@@ -17,7 +17,7 @@ __all__ = [
     "main",
 ]
 
-APP_ID = "org.quadrahq.Quadra"
+APP_ID = "io.github.schlabbadabadoo.QuadraLite"
 
 
 class LauncherApp(Adw.Application):
@@ -30,12 +30,12 @@ class LauncherApp(Adw.Application):
         self.open_settings = open_settings
         self.tray: tray.Tray | None = None
         self._stopping = False
-        # `quadrahq --settings` (the shortcut's "Settings" action) opens the
+        # `quadralite --settings` (the shortcut's "Settings" action) opens the
         # settings window of a running Quadra.
         settings_action = Gio.SimpleAction.new("open-settings", None)
         settings_action.connect("activate", lambda *_args: self.show_settings())
         self.add_action(settings_action)
-        # `quadrahq --ciderdarling-settings` activates this in a running launcher.
+        # `quadralite --ciderdarling-settings` activates this in a running launcher.
         action = Gio.SimpleAction.new("ciderdarling-settings", None)
         action.connect("activate", lambda *_args: self._show_ciderdarling_settings())
         self.add_action(action)
@@ -52,9 +52,9 @@ class LauncherApp(Adw.Application):
         wanted = bool(self.window and self.window.settings.get("tray_icon", True))
         if wanted and self.tray is None and not os.environ.get("QUADRA_NO_TRAY"):
             tray_item = tray.Tray(
-                "Quadra",
-                "quadrahq",
-                core.ICONS / "quadrahq-64.png",
+                "Quadra Lite",
+                "quadralite",
+                core.ICONS / "quadralite-64.png",
                 self.show_settings,
                 self._tray_entries,
             )
@@ -139,7 +139,7 @@ class LauncherApp(Adw.Application):
     def do_activate(self):
         pending = uri_handoff.peek_pending()
         if not self.window:
-            Gtk.Window.set_default_icon_name("quadrahq")
+            Gtk.Window.set_default_icon_name("quadralite")
             display = Gdk.Display.get_default()
             if display is not None:
                 icon_theme = Gtk.IconTheme.get_for_display(display)

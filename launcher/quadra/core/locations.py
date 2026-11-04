@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 from ..darling.runtime import resolve_runtime
-from ..paths import migrate_directories, user_directory
+from ..paths import user_directory
 
 __all__ = [
     "APP_BUNDLE",
@@ -112,11 +112,7 @@ SETTINGS_FILE = CONFIG_DIR / "settings.json"
 WEB_DATA_DIR = CONFIG_DIR / "web"
 
 DARLING_HOME = DARLING_PREFIX / "Users" / os.environ.get("USER", "user")
-SESSION_DIR = migrate_directories(
-    DARLING_HOME / "Library" / "QuadraHQ",
-    DARLING_HOME / "Library" / "CiderHQ",
-    DARLING_HOME / "Library" / "MacOBlox",
-)
+SESSION_DIR = DARLING_HOME / "Library" / "QuadraLite"
 SESSION_FILES = [
     SESSION_DIR / "Cookies.plist",
     SESSION_DIR / "Keychain",

@@ -17,7 +17,7 @@ from quadra import core, graphics, ui
 from gi.repository import Adw, Gio, GLib, Gtk
 
 saved, errors = [], []
-application = Adw.Application(application_id="org.quadrahq.Quadra.M2VKSettingsTest",
+application = Adw.Application(application_id="io.github.schlabbadabadoo.QuadraLite.M2VKSettingsTest",
                               flags=Gio.ApplicationFlags.NON_UNIQUE)
 application.register(None)
 

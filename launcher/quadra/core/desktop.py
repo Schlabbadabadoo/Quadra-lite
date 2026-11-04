@@ -16,10 +16,10 @@ __all__ = [
 ]
 
 # A shortcut to Settings -> CiderDarling while CiderDarling is installed; the
-# same entry as packaging/org.quadrahq.Quadra.CiderDarling.desktop and the one
+# same entry as packaging/io.github.schlabbadabadoo.QuadraLite.CiderDarling.desktop and the one
 # launcher/install.sh writes. The marker line identifies a copy we may remove.
-CIDERDARLING_SHORTCUT = "org.quadrahq.Quadra.CiderDarling.desktop"
-SHORTCUT_MARKER = "X-QuadraHQ-Managed=true"
+CIDERDARLING_SHORTCUT = "io.github.schlabbadabadoo.QuadraLite.CiderDarling.desktop"
+SHORTCUT_MARKER = "X-QuadraLite-Managed=true"
 CIDERDARLING_DESKTOP = """[Desktop Entry]
 Type=Application
 Name=CiderDarling Settings
@@ -27,7 +27,7 @@ Name[ru]=Настройки CiderDarling
 Comment=Graphics card, runtime and diagnostics settings for CiderDarling
 Comment[ru]=Видеокарта, среда и диагностика для CiderDarling
 Exec={command} --ciderdarling-settings
-Icon=quadrahq
+Icon=quadralite
 Terminal=false
 Categories=Game;
 Keywords=ciderdarling;darling;gpu;
@@ -40,8 +40,8 @@ def _desktop_command():
     """How desktop entries start this launcher: the packages' wrapper (it sets
     the prebuilt shim path), or this checkout's script as a quoted argument."""
     if locations.PREBUILT_SHIM:
-        return "quadrahq"
-    text = str(locations.PROJECT / "launcher" / "quadrahq-launcher").replace(
+        return "quadralite"
+    text = str(locations.PROJECT / "launcher" / "quadralite-launcher").replace(
         "\\", "\\\\\\\\"
     )
     for character in '"`$':

@@ -144,7 +144,7 @@ class HostAudio:
                 "--media-role",
                 "Communication",
                 "-P",
-                '{ application.name = "Roblox" application.icon-name = "quadrahq" '
+                '{ application.name = "Roblox" application.icon-name = "quadralite" '
                 'media.name = "Roblox microphone (Quadra)" }',
                 str(fifo),
             ]
@@ -251,7 +251,7 @@ class HostAudio:
                 "--media-role",
                 "Game",
                 "-P",
-                '{ application.name = "Roblox" application.icon-name = "quadrahq" '
+                '{ application.name = "Roblox" application.icon-name = "quadralite" '
                 f'media.name = "{cls.NAME}" }}',
                 str(fifo),
             ]

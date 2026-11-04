@@ -137,7 +137,7 @@ int main(int argc,char **argv) {
     struct xdg_toplevel *top=xdg_surface_get_toplevel(xdg);CHECK(top);
     xdg_toplevel_add_listener(top,&top_listener,NULL);
     xdg_toplevel_set_title(top,"QuadraM2VK presentation qualification");
-    xdg_toplevel_set_app_id(top,"org.quadrahq.Quadra.PresentationTest");
+    xdg_toplevel_set_app_id(top,"io.github.schlabbadabadoo.QuadraLite.PresentationTest");
     wl_surface_commit(parent);CHECK(wl_display_roundtrip(display)>=0);
     background=solid_buffer(0xff203040);cover_buffer=solid_buffer(0xff809080);
     wl_surface_attach(parent,background,0,0);opaque(parent);wl_surface_damage(parent,0,0,384,256);wl_surface_commit(parent);

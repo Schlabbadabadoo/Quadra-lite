@@ -13,7 +13,7 @@ from quadra import core, ui
 from gi.repository import Adw, Gio
 
 saved = []
-application = Adw.Application(application_id="org.quadrahq.Quadra.DpiTest",
+application = Adw.Application(application_id="io.github.schlabbadabadoo.QuadraLite.DpiTest",
                               flags=Gio.ApplicationFlags.NON_UNIQUE)
 application.register(None)
 

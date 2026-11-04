@@ -638,7 +638,7 @@ def wayland_vulkan_environment():
     digest = hashlib.sha256(payload.encode()).hexdigest()[:16]
     cache = (
         Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache"))
-        / "quadrahq/vulkan"
+        / "quadralite/vulkan"
     )
     # Preserve the source basename: Vulkan loader select/disable filters
     # match manifest names, so the extra ICD obeys the same user filters.

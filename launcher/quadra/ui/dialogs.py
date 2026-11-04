@@ -64,7 +64,7 @@ def _choose_file(
 
 
 def _error_dialog(window, heading, details):
-    # Logs are kept in ~/.cache/quadrahq/last-error.txt.
+    # Logs are kept in ~/.cache/quadralite/last-error.txt.
     try:
         core.CACHE_DIR.mkdir(parents=True, exist_ok=True)
         core.LAST_ERROR.write_text(f"Quadra {__version__}\n{heading}\n\n{details}\n")

@@ -29,7 +29,7 @@ class BootSplash(Gtk.Window):
             margin_end=34,
             valign=Gtk.Align.CENTER,
         )
-        logo = Gtk.Image.new_from_file(str(core.ICONS / "quadrahq-64.png"))
+        logo = Gtk.Image.new_from_file(str(core.ICONS / "quadralite-64.png"))
         logo.set_pixel_size(72)
         box.append(logo)
         self.status = Gtk.Label(

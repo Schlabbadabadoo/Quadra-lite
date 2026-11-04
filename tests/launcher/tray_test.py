@@ -29,7 +29,7 @@ connection.register_object("/StatusNotifierWatcher", Gio.DBusNodeInfo.new_for_xm
 Gio.bus_own_name_on_connection(connection, tray.WATCHER, Gio.BusNameOwnerFlags.NONE, None, None)
 
 state = {"running": True}
-item = tray.Tray("Quadra", "quadrahq", None, lambda: clicks.append("activate"),
+item = tray.Tray("Quadra", "quadralite", None, lambda: clicks.append("activate"),
                  lambda: [("Open settings", lambda: clicks.append("settings"), True), None,
                           ("Stop Roblox", lambda: clicks.append("stop"), False)])
 assert item.start()

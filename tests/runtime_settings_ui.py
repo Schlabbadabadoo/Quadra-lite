@@ -49,7 +49,7 @@ def discovery(current, pinned=None):
                               cider_directory=base / "versions", pinned=pinned)
 
 
-application = Adw.Application(application_id="org.quadrahq.Quadra.RuntimeTest",
+application = Adw.Application(application_id="io.github.schlabbadabadoo.QuadraLite.RuntimeTest",
                               flags=Gio.ApplicationFlags.NON_UNIQUE)
 application.register(None)
 errors, restarts = [], []
@@ -150,7 +150,7 @@ with context:
     assert page.runtime_row.get_selected() == 0 and page.runtime_apply_button.get_sensitive()
     assert page.runtime_row.get_model().get_string(0) == "DarlingHQ's Darling"
 
-with patch.dict(os.environ, FLATPAK_ID="org.quadrahq.Quadra"):
+with patch.dict(os.environ, FLATPAK_ID="io.github.schlabbadabadoo.QuadraLite"):
     context, window = fixture("regular")
     with context:
         page = window.settings_page
@@ -227,7 +227,7 @@ with context:
     assert selection_file.read_bytes() == before and "cancelled" in errors[-1][-1]
     assert page.runtime_install_button.get_sensitive()
 
-with patch.dict(os.environ, FLATPAK_ID="org.quadrahq.Quadra"):
+with patch.dict(os.environ, FLATPAK_ID="io.github.schlabbadabadoo.QuadraLite"):
     context, window = fixture("regular")
     with context, patch.object(ui, "_launch_runtime_terminal") as launch_terminal:
         assert not window.settings_page.runtime_install_row.get_visible()
@@ -238,7 +238,7 @@ with patch.object(os, "execve") as execute, patch.object(sys, "argv", ["launcher
     ui._restart_launcher()
     command, arguments, environment = execute.call_args.args
     assert command == sys.executable
-    assert arguments == [sys.executable, str(core.PROJECT / "launcher/quadrahq-launcher")]
+    assert arguments == [sys.executable, str(core.PROJECT / "launcher/quadralite-launcher")]
     assert environment["QUADRA_PAGE"] == "settings" and "roblox:old-link" not in arguments
 
 # A published descendant is offered without changing an active Regular

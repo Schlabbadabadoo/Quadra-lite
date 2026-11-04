@@ -21,11 +21,11 @@ def _restart_launcher(page="settings"):
     # Start the normal entry point without replaying an original Roblox URI.
     # A fresh process loads the selected client, sysroot and prefix together.
     environment = dict(os.environ, QUADRA_PAGE=page)
-    entry = core.PROJECT / "launcher/quadrahq-launcher"
+    entry = core.PROJECT / "launcher/quadralite-launcher"
     if not entry.is_file():
         raise FileNotFoundError(
             _(
-                "Quadra's launcher files are missing. Reinstall Quadra before restarting."
+                "Quadra Lite's launcher files are missing. Reinstall it before restarting."
             )
         )
     os.execve(sys.executable, [sys.executable, str(entry)], environment)
@@ -59,10 +59,7 @@ def _launch_runtime_terminal(window, command):
 
 def _links():
     """(title, icon, uri) of the project's community pages."""
-    links = [
-        ("Website", "quadra-web-symbolic", "https://quadrahq.org"),
-        ("Discord", "quadra-discord-symbolic", author.DISCORD_URL),
-    ]
+    links = []
     if author.GITHUB_URL:
         links.append(("GitHub", "quadra-github-symbolic", author.GITHUB_URL))
     return links

@@ -15,9 +15,9 @@ __all__ = [
 
 def icon_argb_file():
     """Write the logo in _NET_WM_ICON layout for the shim (see QUADRA_ICON_ARGB)."""
-    target = locations.CACHE_DIR / "icon-quadrahq.argb"
+    target = locations.CACHE_DIR / "icon-quadralite.argb"
     sources = [
-        (locations.ICONS / f"quadrahq-{size}.png", size) for size in (32, 64, 128)
+        (locations.ICONS / f"quadralite-{size}.png", size) for size in (32, 64, 128)
     ]
     if target.exists() and all(
         source.exists() and target.stat().st_mtime >= source.stat().st_mtime

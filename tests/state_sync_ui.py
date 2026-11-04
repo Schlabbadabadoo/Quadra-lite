@@ -11,7 +11,7 @@ from quadra.rosemary import runtime as rosemary_runtime
 from gi.repository import Adw, Gio, GLib
 
 saved, toasts, dialogs = [], [], []
-application = Adw.Application(application_id="org.quadrahq.Quadra.StateSyncTest",
+application = Adw.Application(application_id="io.github.schlabbadabadoo.QuadraLite.StateSyncTest",
                               flags=Gio.ApplicationFlags.NON_UNIQUE)
 application.register(None)
 

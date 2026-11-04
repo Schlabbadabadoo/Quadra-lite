@@ -21,7 +21,7 @@ threading.Thread.start = lambda self: None
 from quadra import core, setup, ui
 from gi.repository import Adw, Gio
 
-application = Adw.Application(application_id='org.quadrahq.Quadra.UpdateTest',
+application = Adw.Application(application_id='io.github.schlabbadabadoo.QuadraLite.UpdateTest',
                               flags=Gio.ApplicationFlags.NON_UNIQUE)
 application.register(None)
 release = {'version': '0.744.0.7441080', 'clientVersionUpload': 'version-212bac6bdccd4673'}

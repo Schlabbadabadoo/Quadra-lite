@@ -15,7 +15,7 @@ ROBLOX_USER = "H4Ru_456"
 ROBLOX_ID = 8847914296
 PROFILE_URL = f"https://www.roblox.com/users/{ROBLOX_ID}/profile"
 DISCORD_URL = "https://discord.gg/W8jXfngc8z"
-GITHUB_URL = "https://github.com/QuadraHQ/Quadra"
+GITHUB_URL = "https://github.com/Schlabbadabadoo/Quadra-Lite"
 
 # Maintainer of this version; the picture ships with the launcher.
 MAINTAINER = "aubree.wtf"
