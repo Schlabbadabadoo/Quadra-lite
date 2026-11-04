@@ -17,7 +17,7 @@
 
 set -euo pipefail
 
-REPO=https://github.com/QuadraHQ/Quadra.git
+REPO=https://github.com/Schlabbadabadoo/Quadra-Lite.git
 DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
 DIR=$DATA_HOME/QuadraHQ
 LEGACY_CIDER_DIR=$DATA_HOME/CiderHQ
