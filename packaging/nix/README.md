@@ -63,7 +63,6 @@ Add Quadra to your system flake inputs, then import its module:
           programs.quadrahq = {
             enable = true;
             runtime = "ciderdarling"; # Or "regular" or "rosemary"
-            # withStudio = true;     # Also include Wine for Roblox Studio
           };
         }
       ];
@@ -85,7 +84,7 @@ xdg.mime.defaultApplications = {
 For Home Manager, add `quadra.packages.x86_64-linux.quadrahq` to
 `home.packages` and enable graphics in the host's NixOS configuration.
 The flake also exports `overlays.default`; the resulting `pkgs.quadrahq`
-accepts `.override { runtime = "rosemary"; withStudio = true; }`.
+accepts `.override { runtime = "rosemary"; }`.
 
 ## Runtime selection and updates
 
@@ -109,7 +108,7 @@ package and its matching runtime. Prefix data is retained across upgrades.
 
 The rootless runtime needs user namespaces enabled (the NixOS default).
 This is a NixOS package; using it on other distributions may require extra
-GPU integration. Wine is optional and is only included with `withStudio`.
+GPU integration.
 
 ## Development
 

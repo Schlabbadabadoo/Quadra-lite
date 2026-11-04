@@ -8,8 +8,7 @@ in the order they load (a module only uses the ones above it):
     system           restarting the launcher, opening a terminal, the project's links
     logs_view        the game log viewer on the Play page
     play_page        Play
-    flags_page       the fast flag editors (client and Studio)
-    studio_page      Roblox Studio
+    flags_page       the fast flags editor
     settings_page    Settings and its tabs, with the runtime choice
     info_page        Info
     mods_page        Mods
@@ -45,7 +44,6 @@ from . import (
     play_page,
     servers_page,
     settings_page,
-    studio_page,
     system,
     widgets,
 )
@@ -59,7 +57,6 @@ namespace.share_names(
         logs_view,
         play_page,
         flags_page,
-        studio_page,
         settings_page,
         info_page,
         mods_page,
@@ -82,6 +79,5 @@ if TYPE_CHECKING:  # tells editors and type checkers what ui.NAME is
     from .play_page import *
     from .servers_page import *
     from .settings_page import *
-    from .studio_page import *
     from .system import *
     from .widgets import *

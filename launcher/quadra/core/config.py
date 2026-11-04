@@ -67,7 +67,7 @@ DEFAULT_SETTINGS = {
     "keep_logs": 30,
     "show_sidebar": True,
     "framerate_cap": 0,
-    "hide_launcher_on_launch": True,
+    "hide_launcher_on_launch": False,
     "show_playtime": True,
     # Sends the game server's IP address to RoValra, so it is opt-in. (The
     # former show_server_location key was saved as true for everyone.)
@@ -137,19 +137,6 @@ DEFAULT_SETTINGS = {
     # Milliseconds between looks at the game's idle I/O loops (QUADRA_KEVENT_POLL_MS in net_trace.c). Without it
     # the menu waited about 18 s after leaving a game for a loop that was never woken; 0 turns it off.
     "kevent_poll_ms": 100,
-    # Roblox Studio (studio.py), through Wine. See Settings -> Studio.
-    "studio_renderer": "dxvk",  # dxvk, dxvk-sarek, d3d11 (Wine's OpenGL), d3d11fl10 or vulkan
-    "studio_gpu": "",  # PCI address of the GPU Studio renders on; "" is the system default
-    "studio_gamemode": True,
-    "studio_webview": True,  # Edge WebView2, which Studio's sign-in and web panels need
-    "studio_discord": True,
-    "studio_theme": True,  # follow the system's light/dark preference
-    "studio_backup": True,  # keep Studio's sign-in and settings outside the Wine prefix
-    "studio_wine": "",  # a Kombucha release tag; "" is the newest stable
-    "studio_wine_root": "",  # a Wine folder of your own (it holds bin/wine); replaces Kombucha
-    "studio_version": "",  # a Studio deployment (version-...) to stay on; "" is the newest
-    "studio_channel": "",  # a deployment channel; "" is the one of the signed-in account
-    "studio_fflags": {},  # extra Studio fast flags
 }
 
 # Settings -> environment variables understood by the shim.

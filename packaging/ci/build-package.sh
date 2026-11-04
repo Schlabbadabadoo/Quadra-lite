@@ -63,9 +63,5 @@ for tail in ('/quadrahq/shim/metal/libquadra_metal_host.so',
              '/quadrahq/shim/metal/Metal.framework/Versions/A/Metal'):
     assert any(name.endswith(tail) for name in files), f'Missing Metal payload: {tail}'
 print('Verified packaged Metal framework and host library.')
-# Studio's Vulkan renderer needs this layer; it is built only when the Vulkan headers are installed.
-assert any(name.endswith('/quadrahq/shim/libquadra-studio-layer.so') for name in files), \
-    'Missing Studio Vulkan layer: are the Vulkan development headers installed?'
-print('Verified packaged Studio Vulkan layer.')
 PY
 chmod -R a+rX /out

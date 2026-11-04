@@ -40,13 +40,12 @@ new language.
 
 | Path | What |
 |---|---|
-| `launcher/quadra/` | The launcher and everything both runtimes share: settings, the window, Roblox install and update, diagnostics, Studio, VR settings, mods |
+| `launcher/quadra/` | The launcher and everything both runtimes share: settings, the window, Roblox install and update, diagnostics, VR settings, mods |
 | `launcher/quadra/darling/` | Launcher code that only the Darling runtime uses: runtime selection and installation, client patches, the web sign-in bridge, stall watching |
 | `launcher/quadra/rosemary/` | Launcher code that only the Rosemary runtime uses: installing Rosemary and its Roblox client, starting a session, VR |
 | `darling/` | Everything native that only Darling needs ([README](darling/README.md)): `shim/` is injected into Roblox, `frameworks/` holds stub frameworks, `metal-vulkan/` is Metal on Vulkan |
 | `rosemary/` | Everything native that only Rosemary needs ([README](rosemary/README.md)): `vr/` builds the VR library Rosemary injects |
 | `vr/` | The OpenXR VR device, compiled into both the Darling shim and Rosemary's VR library ([README](vr/README.md)) |
-| `studio_layer/` | Roblox Studio's Vulkan layer under Wine (neither runtime) |
 | `packaging/`, `flatpak/`, `flake.nix` | AUR, Debian, RPM, Nix and Flatpak recipes |
 | `tests/` | Native and Python tests |
 | `docs/` | Design notes, runtime notes, bug triage records |

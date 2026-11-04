@@ -16,7 +16,6 @@
   desktop-file-utils,
   buildFHSEnv,
   runtime ? "ciderdarling",
-  withStudio ? false,
 }:
 assert lib.assertMsg (builtins.elem runtime [
   "ciderdarling"
@@ -180,7 +179,6 @@ buildFHSEnv {
       p.pciutils
       p.openxr-loader
     ]
-    ++ lib.optional withStudio p.wineWow64Packages.stable;
   multiArch = false;
   # The guest root contains symlinks such as /Volumes/SystemRoot -> /.
   # Mount it after the FHS merge, which otherwise follows guest symlinks.

@@ -35,10 +35,6 @@ install -m644 "$source_root/README.md" "$share/"
 install -m755 "$source_root/install-runtime.sh" "$share/"
 install -m755 "$build_dir/libQuadraShims.dylib" \
   "$build_dir/libquadra-wayland.so" "$shim/"
-# Studio's Vulkan fix: optional, built only where the Vulkan headers are installed.
-if [[ -f $build_dir/libquadra-studio-layer.so ]]; then
-  install -m755 "$build_dir/libquadra-studio-layer.so" "$shim/"
-fi
 cp -r --no-preserve=ownership "$build_dir/frameworks" "$shim/"
 install -d "$shim/metal" "$share/darling/metal-vulkan"
 install -m755 "$build_dir/metal/libquadra_metal_host.so" "$shim/metal/"
@@ -55,12 +51,10 @@ for size in 16 22 24 32 48 64 128 256 512 1024; do
     "$destdir/usr/share/icons/hicolor/${size}x${size}/apps/quadrahq.png"
 done
 for file in org.quadrahq.Quadra.desktop org.quadrahq.Quadra.URI.desktop \
-  org.quadrahq.Quadra.Studio.desktop quadrahq-roblox-window.desktop; do
+  quadrahq-roblox-window.desktop; do
   install -Dm644 "$source_root/packaging/$file" \
     "$destdir/usr/share/applications/$file"
 done
-install -Dm644 "$source_root/packaging/org.quadrahq.Quadra.xml" \
-  "$destdir/usr/share/mime/packages/org.quadrahq.Quadra.xml"
 install -Dm644 "$source_root/LICENSE" \
   "$destdir/usr/share/licenses/quadrahq/LICENSE"
 install -m644 "$source_root/LICENSES/MIT-MacOBlox.txt" \

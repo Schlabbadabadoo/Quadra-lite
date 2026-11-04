@@ -34,22 +34,6 @@ else
   rm -f -- "$build_dir/libquadra-wayland.so"
   printf '%s\n' 'Native Wayland helper skipped: install SDL2 and Wayland development libraries.' >&2
 fi
-# Studio's Vulkan renderer needs this layer under Wine (studio_layer/README.md).
-# Optional: without the Vulkan headers the renderer still runs, only unfixed.
-if pkg-config --exists vulkan; then
-  layer_output=$(mktemp "$build_dir/.layer.XXXXXX")
-  if clang++ -std=c++17 -O2 -fPIC -shared $(pkg-config --cflags vulkan) -I"$project_dir/studio_layer" \
-      "$project_dir/studio_layer/quadra_studio_layer.cpp" -o "$layer_output"; then
-    chmod 755 "$layer_output"
-    mv -- "$layer_output" "$build_dir/libquadra-studio-layer.so"
-  else
-    rm -f -- "$layer_output" "$build_dir/libquadra-studio-layer.so"
-    printf '%s\n' 'Studio Vulkan layer skipped: it did not compile.' >&2
-  fi
-else
-  rm -f -- "$build_dir/libquadra-studio-layer.so"
-  printf '%s\n' 'Studio Vulkan layer skipped: install the Vulkan development headers.' >&2
-fi
 tmp_output=$(mktemp "$build_dir/.shim.XXXXXX")
 trap 'rm -f -- "$tmp_output"' EXIT
 # Memory/string functions replacing Darling's unoptimized ones: -O2 and no

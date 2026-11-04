@@ -138,9 +138,6 @@ with patch.object(core, "load_settings", return_value=settings), \
     window.set_setting("mangohud", False)
     assert not rebuilt_mangohud.get_active()
     assert mangohud.get_active(), "a page from before the rebuild no longer follows the settings"
-    window.studio_status.set((None, ""))
-    assert not window.play_page.studio.get_sensitive() and play.studio.get_sensitive()
-    window.studio_status.set(None)
     window.set_language("en")
     settle()
     window.destroy()

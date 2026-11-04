@@ -34,8 +34,7 @@ from pathlib import Path
 root, output, version = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
 paths = {Path(name.decode()) for name in subprocess.check_output(
     ['git', '-C', str(root), 'ls-files', '-z']).split(b'\0') if name}
-directories = ('launcher', 'branding', 'packaging', 'darling', 'rosemary', 'vr', 'flatpak', 'docs', 'LICENSES',
-               'studio_layer')
+directories = ('launcher', 'branding', 'packaging', 'darling', 'rosemary', 'vr', 'flatpak', 'docs', 'LICENSES')
 new_files = subprocess.check_output(['git', '-C', str(root), 'ls-files', '-z',
                                     '--others', '--exclude-standard', '--', *directories])
 public_extensions = {'.py', '.sh', '.c', '.m', '.h', '.cpp', '.rs', '.toml', '.lock', '.svg', '.desktop', '.xml', '.json', '.yml', '.in', '.md', '.spec',

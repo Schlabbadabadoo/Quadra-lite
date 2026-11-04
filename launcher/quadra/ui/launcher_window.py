@@ -20,7 +20,6 @@ from .. import (
     modguard,
     mods,
     region,
-    studio,
     theme,
 )
 from .. import uri as uri_handoff
@@ -36,7 +35,6 @@ from . import (
     play_page,
     servers_page,
     settings_page,
-    studio_page,
     system,
     widgets,
 )
@@ -61,7 +59,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         i18n.set_language(self.settings.get("language", "en"))
         self.activity_changes = core.Subscribers()
         self.client_changes = core.Subscribers()
-        self.studio_status = core.ObservableValue()
         self._page_subscriptions = []
         self._session = None
         # One long operation at a time: starting, updating, building,
@@ -105,7 +102,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.launch_cancelled = False
         self.play_page = None
         self.settings_page = None
-        self.studio_page = None
         setup_action = Gio.SimpleAction.new("setup", None)
         setup_action.connect("activate", lambda *_args: self.show_setup())
         self.add_action(setup_action)
@@ -170,9 +166,6 @@ class LauncherWindow(Adw.ApplicationWindow):
 
     def watch_client(self, callback):
         self._page_subscriptions.append(self.client_changes.add(callback))
-
-    def watch_studio(self, callback):
-        self._page_subscriptions.append(self.studio_status.watch(callback))
 
     def _stop_page_subscriptions(self):
         subscriptions, self._page_subscriptions = self._page_subscriptions, []
@@ -526,8 +519,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         """(Re)create the interface, e.g. after the language changes."""
         if self.settings_page:
             self.settings_page.flush()  # the new page reads the file
-        if self.studio_page:
-            self.studio_page.flush()
         if self.play_page:
             self.play_page.logs_view.stop_server_location_polling()
         self._stop_page_subscriptions()
@@ -542,15 +533,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.stack.add_titled_with_icon(
             self.settings_page, "settings", _("Settings"), "emblem-system-symbolic"
         )
-        # Studio runs through Wine, which the Flatpak does not have.
-        if not os.path.exists("/.flatpak-info"):
-            self.studio_page = studio_page.StudioPage(self)
-            self.stack.add_titled_with_icon(
-                self.studio_page,
-                "studio",
-                _("Studio"),
-                "applications-development-symbolic",
-            )
         self.servers_page = servers_page.ServersPage(self)
         self.stack.add_titled_with_icon(
             self.servers_page, "servers", _("Servers"), "network-server-symbolic"
@@ -670,10 +652,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.settings_page.appearance_tabs.set_visible_child_name(
             "custom" if custom else "gnome"
         )
-        if self.studio_page:
-            self.studio_page.appearance_tabs.set_visible_child_name(
-                "custom" if custom else "gnome"
-            )
         for widget, css in (
             (self, "launcher-custom"),
             (self.content_stack, "launcher-shell"),
@@ -1075,76 +1053,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         # Darling or the shim fails, the browser handoff can still be retried.
         self.launch(browser_uri)
 
-    def studio_clicked(self):
-        if self.studio_status.value is not None:
-            return
-        if studio.running():
-            dialogs._toast(self.toasts, _("Roblox Studio is already running"))
-            return
-        if not studio.needs_install():
-            self._update_and_start_studio()
-            return
-        dialog = Adw.AlertDialog(
-            heading=_("Install Roblox Studio?"),
-            body=_(
-                "Studio runs in its Windows version through Wine. Quadra downloads Wine, "
-                "DXVK, Microsoft's WebView2 and Studio, about 800 MB."
-            ),
-        )
-        dialog.add_response("cancel", _("Cancel"))
-        dialog.add_response("install", _("Install"))
-        dialog.set_response_appearance("install", Adw.ResponseAppearance.SUGGESTED)
-        dialog.connect(
-            "response",
-            lambda _d, result: result == "install" and self._update_and_start_studio(),
-        )
-        dialog.present(self)
-
-    def _update_and_start_studio(self):
-        """Installs or updates Studio when needed, then starts it."""
-        if self.studio_status.value is not None:
-            return
-        if self.studio_page:
-            self.studio_page.flush()  # Studio reads the flags when it starts
-        self.studio_status.set((None, ""))
-
-        def progress(fraction, text):
-            GLib.idle_add(self.studio_status.set, (fraction, text))
-
-        def work():
-            settings = self.settings.snapshot()
-            try:
-                studio.install(progress, settings)
-            except studio.ChannelError:
-                raise
-            except Exception as error:
-                if studio.needs_install():
-                    raise
-                # Offline or Roblox unreachable: start the installed version.
-                print("Studio update skipped:", error)
-            # A process of its own looks after Studio (GameMode, Discord, the sign-in backup).
-            studio.spawn()
-
-        def done(_result, error):
-            self.studio_status.set(None)
-            if self.studio_page:
-                self.studio_page.refresh()
-            if error:
-                dialogs._error_dialog(
-                    self, _("Could not start Roblox Studio"), str(error) or repr(error)
-                )
-            else:
-                dialogs._toast(self.toasts, _("Starting Roblox Studio…"))
-
-        def run():
-            try:
-                work()
-                GLib.idle_add(done, None, None)
-            except Exception as error:
-                GLib.idle_add(done, None, error)
-
-        threading.Thread(target=run, daemon=True).start()
-
     def _rosemary_install_then_launch(self, launch_uri):
         """Rosemary or its Roblox client is missing: install them, with the splash
         showing progress, then start with the same link."""
@@ -1484,7 +1392,7 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.close_splash()
         if (
             self.session
-            and self.settings.get("hide_launcher_on_launch", True)
+            and self.settings.get("hide_launcher_on_launch", False)
             and self._transport_warning_dialog is None
         ):
             self.set_visible(False)
@@ -1572,13 +1480,9 @@ class LauncherWindow(Adw.ApplicationWindow):
         GLib.idle_add(self._allowlist_loaded)
 
     def _allowlist_loaded(self):
-        for page in (
-            getattr(self.settings_page, "flags_page", None),
-            getattr(self, "studio_page", None),
-        ):
-            page = getattr(page, "flags_page", page)
-            if page is not None and hasattr(page, "refresh_allowlist"):
-                page.refresh_allowlist()
+        page = getattr(self.settings_page, "flags_page", None)
+        if page is not None and hasattr(page, "refresh_allowlist"):
+            page.refresh_allowlist()
         return False
 
     def _rosemary_update_and_relaunch(self):
@@ -1870,7 +1774,8 @@ class LauncherWindow(Adw.ApplicationWindow):
             or self._transport_warning_dialog is not None
         ):
             self.present_settings()
-        else:
+        elif not self.get_visible():
+            # The launcher stayed open while the game ran: leave it open.
             self.get_application().quit()
         if failed:
             if reason == "captcha":

@@ -11,23 +11,6 @@ def main(argv=None):
 
     paths.migrate_environment()
 
-    # `quadrahq --studio [link or file]` opens Roblox Studio directly; the system
-    # calls it for roblox-studio: and roblox-studio-auth: links (sign in).
-    if argv[:1] == ["--studio"]:
-        from quadra import studio
-
-        if not studio.needs_install():
-            # This process stays until Studio closes: it looks after GameMode, Discord
-            # presence and the sign-in backup. The launcher window starts it with
-            # --no-update after it has updated Studio itself.
-            arguments = argv[1:]
-            update = arguments[:1] != ["--no-update"]
-            try:
-                return studio.run(arguments if update else arguments[1:], update=update)
-            except (OSError, RuntimeError) as error:
-                print(f"Roblox Studio could not start: {error}", file=sys.stderr)
-                return 1
-
     # Linux has no LaunchServices. Keep the browser's Roblox argument opaque and
     # let the normal launcher process consume it once Darling is ready. Writing it
     # before starting GTK also covers a second protocol click while the first

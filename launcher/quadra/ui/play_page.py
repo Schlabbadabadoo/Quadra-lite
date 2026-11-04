@@ -1,7 +1,5 @@
 """The Play page."""
 
-import os
-
 from gi.repository import Adw, GLib, Gtk, Pango
 
 from .. import core, theme
@@ -110,24 +108,12 @@ class PlayPage(Adw.Bin):
         self.playtime_box.set_tooltip_text(_("Total playtime"))
         action_bar.pack_start(self.playtime_box)
 
-        self.studio_progress = Gtk.ProgressBar(show_text=True, visible=False)
-        self.studio_progress.set_size_request(160, -1)
-        action_bar.pack_start(self.studio_progress)
-
         self.play = Gtk.Button(label=_("Play"))
         self.play.add_css_class("suggested-action")
         self.play.add_css_class("pill")
         self.play.set_size_request(140, -1)
         self.play.connect("clicked", lambda *_args: self._on_play_clicked())
         action_bar.pack_end(self.play)
-
-        self.studio = Gtk.Button(label=_("Roblox Studio"))
-        self.studio.add_css_class("pill")
-        self.studio.set_size_request(130, -1)
-        self.studio.connect("clicked", lambda *_args: window.studio_clicked())
-        # Studio needs Wine, which the Flatpak does not have yet.
-        self.studio.set_visible(not os.path.exists("/.flatpak-info"))
-        action_bar.pack_end(self.studio)
 
         toolbar_view.add_bottom_bar(action_bar)
         # The original status page stays intact for GNOME. Both designs share
@@ -145,8 +131,6 @@ class PlayPage(Adw.Bin):
         window.watch_setting(
             PLAYTIME_SETTINGS, lambda _key, _value: self.refresh_playtime()
         )
-        window.watch_studio(self.show_studio_status)
-        self.show_studio_status(window.studio_status.value)
         self.refresh()
 
     def _dashboard(self):
@@ -266,16 +250,6 @@ class PlayPage(Adw.Bin):
         if self._darling_status_timer:
             GLib.source_remove(self._darling_status_timer)
             self._darling_status_timer = 0
-
-    def show_studio_status(self, status):
-        busy = status is not None
-        fraction, text = status or (None, "")
-        self.studio.set_sensitive(not busy)
-        self.studio.set_label(_("Checking…") if busy else _("Roblox Studio"))
-        self.studio_progress.set_visible(fraction is not None)
-        if fraction is not None:
-            self.studio_progress.set_fraction(fraction)
-            self.studio_progress.set_text(text)
 
     def set_appearance(self, appearance):
         custom = appearance != "gnome"

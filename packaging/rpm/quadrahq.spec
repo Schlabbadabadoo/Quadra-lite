@@ -84,7 +84,6 @@ GUI frameworks and stubs is required.
 QUADRA_BUILD_DIR="$PWD/native-build" ./build_debug_shim.sh
 QUADRA_BUILD_DIR="$PWD/native-build" bash packaging/build-metal.sh
 strip --strip-unneeded native-build/libquadra-wayland.so
-[ ! -f native-build/libquadra-studio-layer.so ] || strip --strip-unneeded native-build/libquadra-studio-layer.so
 
 %install
 bash "%{SOURCE1}" "$PWD" "$PWD/native-build" "%{buildroot}" "%{_libdir}"
@@ -98,7 +97,6 @@ python3 -m compileall -q -d "%{_datadir}/quadrahq/launcher" "%{buildroot}%{_data
 %{_datadir}/applications/org.quadrahq.Quadra*.desktop
 %{_datadir}/applications/quadrahq-roblox-window.desktop
 %{_datadir}/icons/hicolor/*/apps/quadrahq.png
-%{_datadir}/mime/packages/org.quadrahq.Quadra.xml
 
 %changelog
 * Mon Nov 02 2026 Quadra maintainers <noreply@aubree.wtf> - 0.42.p3-1

@@ -26,7 +26,6 @@ in
       default = "ciderdarling";
       description = "Bundled runtime: CiderDarling, regular Darling, or Rosemary without Darling. Each keeps its own prefix and sign-in.";
     };
-    withStudio = lib.mkEnableOption "Wine for Roblox Studio";
   };
   config = lib.mkIf cfg.enable {
     assertions = [
@@ -35,7 +34,7 @@ in
         message = "Quadra and Darling require x86_64 Linux.";
       }
     ];
-    environment.systemPackages = [ (cfg.package.override { inherit (cfg) runtime withStudio; }) ];
+    environment.systemPackages = [ (cfg.package.override { inherit (cfg) runtime; }) ];
     hardware.graphics.enable = true;
   };
 }

@@ -76,22 +76,6 @@ NoDisplay=true
 MimeType=x-scheme-handler/roblox;x-scheme-handler/roblox-player;
 DESKTOP
 
-# Roblox Studio (Windows version through Wine), also the handler of the
-# roblox-studio: links and of roblox-studio-auth: that signs Studio in.
-cat > "$data_home/applications/org.quadrahq.Quadra.Studio.desktop" <<DESKTOP
-[Desktop Entry]
-Type=Application
-Name=Roblox Studio (Quadra)
-Comment=Roblox Studio through Wine
-Comment[ru]=Roblox Studio через Wine
-Exec=$exec_path --studio %u
-Icon=quadrahq
-Terminal=false
-Categories=Development;
-MimeType=x-scheme-handler/roblox-studio;x-scheme-handler/roblox-studio-auth;application/x-roblox-place;
-StartupWMClass=robloxstudiobeta.exe
-DESKTOP
-
 # A shortcut to CiderDarling's settings, only while CiderDarling is installed
 # (packaging/org.quadrahq.Quadra.CiderDarling.desktop; the launcher keeps it in
 # step when runtimes change later). Its marker line identifies our copy.
@@ -129,14 +113,7 @@ DESKTOP
 elif [[ $ciderdarling_state == 1 && -n $ciderdarling_ours && -e $ciderdarling_entry ]]; then
   rm -f -- "$ciderdarling_entry"
 fi
-# Place files (.rbxl, .rbxlx) as their own type, so file managers open them
-# with Studio: no MIME database defines one.
-install -Dm644 "$project_dir/packaging/org.quadrahq.Quadra.xml" "$data_home/mime/packages/org.quadrahq.Quadra.xml"
-update-mime-database "$data_home/mime" 2>/dev/null || true
 if command -v xdg-mime >/dev/null; then
-  for type in x-scheme-handler/roblox-studio x-scheme-handler/roblox-studio-auth application/x-roblox-place; do
-    xdg-mime default org.quadrahq.Quadra.Studio.desktop "$type"
-  done
   for type in x-scheme-handler/roblox x-scheme-handler/roblox-player; do
     xdg-mime default org.quadrahq.Quadra.URI.desktop "$type"
   done

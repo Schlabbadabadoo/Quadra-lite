@@ -339,7 +339,7 @@ class SettingsPage(Adw.Bin):
             subtitle=_("Hide the launcher window while the game is running"),
         )
         game.add(
-            widgets.bind_switch(window, hide_launcher, "hide_launcher_on_launch", True)
+            widgets.bind_switch(window, hide_launcher, "hide_launcher_on_launch", False)
         )
 
         reopen = Adw.SwitchRow(

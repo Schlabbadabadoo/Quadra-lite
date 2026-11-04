@@ -117,7 +117,7 @@ setup_plan() {
   printf '  Destination %s\n' "${DIR/#$HOME/\~}"
   printf '  %sNothing else is installed, and sudo is not used.%s\n' "$DIM" "$RESET"
   if is_installed; then
-    printf '  %sUpdates keep settings, Roblox, Studio and existing backups.%s\n' "$DIM" "$RESET"
+    printf '  %sUpdates keep settings, Roblox and existing backups.%s\n' "$DIM" "$RESET"
     printf '  %sLocal source changes are backed up before replacement.%s\n' "$DIM" "$RESET"
   else
     printf '  %sQuadra'"'"'s first-boot screen picks your theme and runtime, then installs them.%s\n' "$DIM" "$RESET"
@@ -310,19 +310,16 @@ do_uninstall() {
     say "Stopping Roblox and Darling"
     DPREFIX="$PREFIX" "$DARLING_EXECUTABLE" shutdown >/dev/null 2>&1 || true
   fi
-  if [[ -x $DIR/studio/wine/bin/wineserver ]]; then
-    WINEPREFIX=$DIR/studio/prefix "$DIR/studio/wine/bin/wineserver" -k >/dev/null 2>&1 || true
-  fi
   if [[ -e $DIR ]]; then
-    say "Removing the launcher, Roblox and Studio (${DIR/#$HOME/\~})"
+    say "Removing the launcher and Roblox (${DIR/#$HOME/\~})"
     rm -rf -- "$DIR"
   fi
   say "Removing the app menu entries, icons and the quadrahq command"
   local apps=$DATA_HOME/applications
   rm -f -- "$apps/org.quadrahq.Quadra.desktop" "$apps/org.quadrahq.Quadra.URI.desktop" \
-    "$apps/org.quadrahq.Quadra.Studio.desktop" "$apps/quadrahq-roblox-window.desktop" \
+    "$apps/quadrahq-roblox-window.desktop" \
     "$DATA_HOME"/icons/hicolor/*/apps/quadrahq.png \
-    "$DATA_HOME/icons/hicolor/scalable/apps/quadrahq.svg" "$DATA_HOME/mime/packages/org.quadrahq.Quadra.xml"
+    "$DATA_HOME/icons/hicolor/scalable/apps/quadrahq.svg"
   # Only Quadra's own CiderDarling entry; a user's entry of that name stays.
   local cider_entry=$apps/org.quadrahq.Quadra.CiderDarling.desktop
   if [[ -f $cider_entry && ! -L $cider_entry ]] && grep -qsx 'X-QuadraHQ-Managed=true' "$cider_entry"; then
@@ -354,10 +351,9 @@ do_uninstall() {
   if [[ -L $link && $(readlink "$link") == */macoblox-launcher ]]; then
     rm -f -- "$link"
   fi
-  # Studio as the handler of roblox-studio: links and place files.
+  # Quadra as the handler of Roblox links.
   if [[ -f $CONFIG_HOME/mimeapps.list ]]; then
-    sed -i -e 's/org\.quadrahq\.Quadra\.Studio\.desktop;\{0,1\}//g' \
-      -e 's/org\.quadrahq\.Quadra\.URI\.desktop;\{0,1\}//g' \
+    sed -i -e 's/org\.quadrahq\.Quadra\.URI\.desktop;\{0,1\}//g' \
       -e 's/org\.ciderhq\.Cider\.Studio\.desktop;\{0,1\}//g' \
       -e 's/org\.ciderhq\.Cider\.URI\.desktop;\{0,1\}//g' \
       -e 's/wtf\.aubree\.MacOBlox\.Studio\.desktop;\{0,1\}//g' \
@@ -530,7 +526,7 @@ PURGE=''
 menu_uninstall() {
   local where=${DIR/#$HOME/\~} prefix=${PREFIX/#$HOME/\~}
   choose "  ${BOLD}Uninstall removes${RESET}
-    ${BULLET} $where (the launcher, Roblox, Studio)
+    ${BULLET} $where (the launcher and Roblox)
     ${BULLET} the app menu entries, icons and the quadrahq command
     ${BULLET} settings and cache
 

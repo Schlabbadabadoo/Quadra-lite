@@ -432,40 +432,6 @@ Tested on a Quest 2 with WiVRn 26.9. Details are in [docs/VR.md](docs/VR.md).
 </details>
 
 <details>
-<summary>Roblox Studio</summary>
-
-**Studio** in the sidebar has everything about it; **Launch Roblox Studio** there, or
-**Roblox Studio** on the Play page, starts it. The first start downloads Wine, DXVK,
-Microsoft's WebView2 and Studio (about 800 MB) into their own folder; nothing is
-installed system-wide. Wine is [Kombucha](https://github.com/vinegarhq/kombucha), the
-build Vinegar patches for Studio. Each start checks for a newer Kombucha and Roblox
-Studio and installs it first; without a connection it starts what is installed.
-
-Studio draws its sign-in, Toolbox and Creator Hub pages with WebView2, so you can sign
-in inside Studio. **Login via Browser** works too: when the browser asks how to open the
-`roblox-studio-auth` link, choose **Roblox Studio (Quadra)**.
-
-The section has four tabs:
-
-- **Studio**: what is installed, Discord presence (the place you are building and
-  whether you are in a script), GameMode, following the system light/dark theme, a
-  backup of your sign-in and Studio's settings outside Wine's prefix (recreating the
-  prefix does not sign you out), and an *overlay* folder whose files are copied over
-  Studio's at every start.
-- **Graphics**: the renderer (DXVK, DXVK-Sarek for older graphics cards, Wine's own
-  Direct3D through OpenGL, or Vulkan with a layer that keeps Studio's swapchain alive),
-  and the graphics card Studio draws on.
-- **Wine and updates**: stay on a Kombucha release or use a Wine folder of your own;
-  stay on one Studio version or deployment channel. By default Studio follows the channel
-  of the signed-in account, as Roblox's own installer does.
-- **Fast flags**: Studio's own flags, separate from the Player's.
-
-If Roblox's main download server refuses a request, Studio's packages come from
-Roblox's alternate hosts. Much of this follows [Vinegar](https://github.com/vinegarhq/vinegar)
-(GPL-3.0), including the Vulkan layer in [studio_layer/](studio_layer/README.md).
-</details>
-
-<details>
 <summary>Flatpak (Discontinued)</summary>
 
 The Flatpak brings Darling along and runs it without root (see
@@ -478,8 +444,7 @@ The last testing bundle is available in
 flatpak install --user MacOBlox-0.19-x86_64.flatpak
 ```
 
-It keeps its own Darling prefix, so sign in to Roblox again there. Roblox Studio
-is not in the Flatpak yet. The current experimental recipe uses the GNOME 51
+It keeps its own Darling prefix, so sign in to Roblox again there. The current experimental recipe uses the GNOME 51
 runtime, which supplies GTK 4, libadwaita, Adwaita icons, PyGObject and
 WebKitGTK on top of Freedesktop 26.08. The launcher draws with OpenGL rather
 than Vulkan (set `GSK_RENDERER` to override it); Roblox keeps its renderer
