@@ -75,6 +75,7 @@ class InfoPage(Adw.PreferencesPage):
         self._refresh_hardware()
 
         made_by = Adw.PreferencesGroup(title=_("Authors"))
+        self.avatar = Adw.Avatar(size=48, text=author.NAME, show_initials=True)
         profile = Adw.ActionRow(
             title=author.NAME,
             activatable=True,
