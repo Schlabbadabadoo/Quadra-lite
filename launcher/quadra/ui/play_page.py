@@ -2,7 +2,7 @@
 
 from gi.repository import Adw, GLib, Gtk, Pango
 
-from .. import core, theme
+from .. import core, gpus, theme
 from ..i18n import _
 from ..rosemary import runtime as rosemary_runtime
 from . import dialogs, logs_view, system
@@ -156,6 +156,7 @@ class PlayPage(Adw.Bin):
             ("client", _("Roblox version")),
             ("renderer", _("Renderer")),
             ("runtime", _("Darling runtime")),
+            ("gpu", _("Graphics")),
         ):
             row = Gtk.Box(spacing=12, css_classes=["play-fact"])
             row.append(
@@ -358,6 +359,13 @@ class PlayPage(Adw.Bin):
                 else "Darling"
             )
         )
+
+        try:
+            adapters = gpus.enumerate_gpus()
+            gpu_name = adapters[0]["name"] if adapters else _("Automatic")
+        except Exception:
+            gpu_name = _("Automatic")
+        self.dashboard_facts["gpu"].set_label(gpu_name)
 
         if running:
             self.play.set_label(_("Stop Roblox"))
