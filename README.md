@@ -5,6 +5,7 @@
   <a href="https://github.com/Schlabbadabadoo/Quadra-Lite/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Schlabbadabadoo/Quadra-Lite?style=flat-square" alt="license"></a>
   <img src="https://img.shields.io/badge/python-3.11%2B-blue?style=flat-square" alt="python">
   <img src="https://img.shields.io/badge/platform-linux-lightgrey?style=flat-square" alt="platform">
+  <a href="https://discord.gg/tEprTnKu7A"><img src="https://img.shields.io/badge/discord-join-5865F2?style=flat-square&logo=discord&logoColor=white" alt="discord"></a>
 </p>
 
 <p align="center">
