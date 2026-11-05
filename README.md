@@ -92,6 +92,13 @@ quadralite --collect-diagnostics
 Settings: `~/.config/quadralite/settings.json`  
 Cache/logs: `~/.cache/quadralite/`
 
+## Compatibility
+
+Tested on CachyOS, Arch, Ubuntu 24.04+, Debian 13, Linux Mint 22 and Fedora,
+with NVIDIA, AMD and Intel GPUs. Rosemary is recommended on NVIDIA; Darling works
+everywhere but is slower. Renderers: OpenGL (default), Vulkan/Zink, and Quadra
+M2VK (Metal on Vulkan).
+
 ## Troubleshooting
 
 Join the [Discord server](https://discord.gg/tEprTnKu7A) for help and questions.
