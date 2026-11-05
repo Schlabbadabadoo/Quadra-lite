@@ -1,23 +1,16 @@
 <p align="center">
-  <img src="branding/quadrahq.webp" alt="Quadra logo" width="160">
+  <img src="branding/quadrahq.webp" alt="Quadra Lite logo" width="160">
 </p>
 
-<h1 align="center">
- Quadra Lite
-</h1>
+<h1 align="center">Quadra Lite</h1>
 
 <p align="center">
-  A lightweight fork of <a href="https://github.com/QuadraHQ/Quadra">Quadra</a> for the macOS Roblox Player client, running on Linux through <a href="https://github.com/microlift/rosemary">Rosemary</a> or <a href="https://darlinghq.org">Darling</a>.
-  Studio, Wine and everything that comes with them are gone; the launcher stays open while you play.
+  A lightweight, game-only fork of <a href="https://github.com/QuadraHQ/Quadra">Quadra</a> for the
+  macOS Roblox Player client, running on Linux through
+  <a href="https://github.com/microlift/rosemary">Rosemary</a> or
+  <a href="https://darlinghq.org">Darling</a>. Roblox Studio, Wine, VR, Discord Rich Presence
+  and Mods are removed; the launcher stays open while you play.
 </p>
-
-## Migration from Cider / Mac O' Blox to Quadra
-
-The source installer moves `~/.local/share/CiderHQ` (or the older
-`~/.local/share/MacOBlox`) to `~/.local/share/QuadraHQ`. Settings and cache move
-from `ciderhq` (or `macoblox`) to `quadrahq`, and Darling session files move
-from `Library/CiderHQ` (or `Library/MacOBlox`) to `Library/QuadraHQ`. Existing
-Quadra data is never replaced; Cider data takes precedence over MacOBlox data.
 
 ## Install
 
@@ -27,456 +20,63 @@ From a checkout of this fork:
 ./install.sh
 ```
 
-**NixOS (x86_64):** use the [Nix package and NixOS module](packaging/nix/README.md).
-It bundles CiderDarling by default, with regular Darling available as an
-alternative. From a checkout, run `nix run .`; use Nix to install and update
-this version instead of the source installer below.
-
-**Arch Linux:** Arch package recipes for `quadrahq` and `quadrahq-git` are
-in [packaging/aur](packaging/aur/README.md).
-
-[Native distro packaging](packaging/README.md) also includes a Debian/Ubuntu
-overlay and a Fedora/openSUSE RPM spec, with pinned source preparation and
-build instructions. These recipes require a full Darling package and have
-not yet been built in their target distros.
-
 Works on Arch and its relatives (CachyOS, EndeavourOS, Manjaro), Ubuntu 24.04+,
 Debian 13, Linux Mint 22 and Fedora.
 
-<details>
-<summary>Install by hand</summary>
+The installer downloads the launcher into `~/.local/share/QuadraLite` and adds a
+menu entry. It installs no runtime: on first launch the setup screen chooses
+between Rosemary (recommended) and Darling, and installs that runtime for you.
 
-**1. Darling and the tools**
+Run `./install.sh` again to update or uninstall. The launcher also checks for
+updates itself.
 
-Arch, CachyOS, EndeavourOS, Manjaro:
-
-```bash
-paru -S darling-bin
-sudo pacman -S clang lld unzip pipewire-audio python-gobject gtk4 libadwaita webkitgtk-6.0
-```
-
-Debian, Ubuntu, Mint: download `debs_20260608.zip` from the
-[Darling release v0.1.20260608](https://github.com/darlinghq/darling/releases/tag/v0.1.20260608)
-(the one Quadra is tested with), then:
+**Dependencies (Debian/Ubuntu/Mint):**
 
 ```bash
-unzip debs_*.zip -d darling-debs
-sudo apt install ./darling-debs/*/*.deb
-sudo apt install clang lld unzip pipewire-bin pulseaudio-utils python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-webkit-6.0
+sudo apt install python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 \
+  gir1.2-webkit-6.0 unzip
 ```
 
-Fedora and others: build Darling with the
-[official guide](https://docs.darlinghq.org/build-instructions.html), then:
+**Dependencies (Arch/CachyOS/EndeavourOS/Manjaro):**
 
 ```bash
-sudo dnf install clang lld unzip pipewire-utils python3-gobject gtk4 libadwaita webkitgtk6.0
+sudo pacman -S python python-gobject gtk4 libadwaita webkitgtk-6.0 unzip
 ```
 
-**2. Quadra**
+Darling itself is installed through the setup screen (or beforehand via your
+package manager).
+
+## Usage
 
 ```bash
-git clone --filter=blob:none --no-checkout --depth 1 --single-branch --branch main \
-  https://github.com/QuadraHQ/Quadra ~/.local/share/QuadraHQ
-git -C ~/.local/share/QuadraHQ sparse-checkout set --no-cone --stdin <<'PATTERNS'
-/*
-!/website/
-!/.github/
-!/vercel.json
-!/.vercel/
-!/.vercelignore
-PATTERNS
-git -C ~/.local/share/QuadraHQ reset --hard HEAD
-~/.local/share/QuadraHQ/launcher/install.sh
-```
-</details>
-
-## Uninstall
-
-```
-curl -fsSL https://quadrahq.org/install.sh | bash -s -- --uninstall
+quadralite                # open the launcher
+quadralite --settings     # open settings directly
+quadralite --collect-diagnostics
 ```
 
-Uninstalling keeps both runtime installations and their prefixes, which hold
-your Roblox sign-in; `--purge` (or **Uninstall everything** in the menu) deletes
-only the selected prefix.
+Settings live in `~/.config/quadralite/settings.json`. Cache and logs are in
+`~/.cache/quadralite/`.
 
-## FAQ
+## Fast flags
 
-<details>
-<summary>Hey, this sounds like Gracejuice!</summary>
+Fast flags are edited in the launcher (Settings → Fast flags) and are kept.
 
-Grapejuice and Quadra are inherently similar because Grapejuice used Wine to run the Windows version of the Roblox client on Linux, while Quadra uses Darling with along with added libraries to use the MacOS version of the Roblox client on Linux. Ergo, Grapejuice and Quadra use the same methods, though use different versions of the Roblox client.
-</details>
+## Playtime
 
-<details>
-<summary>Is my account safe?</summary>
+Playtime tracking has been removed in this fork.
 
-You sign in inside the Roblox client itself, the launcher and we at QuadraHQ **NEVER** see your password since the
-session is stored locally, only on your computer, and not on a server. The cookie is located in
-`~/.darling/Users/$USER/Library/QuadraHQ`. Do not share that folder, it works
-like a fancy keycard to your account. We at QuadraHQ will never ask for this folder, and anyone asking for this is a phishing attempt and should be reported, not only to the service you're on, but also ping (Don't DM) anyone with the "Cool and awesome" role in the [Discord](https://discord.gg/W8jXfngc8z) and above, so we can "take care (ban)" them from the server, or make a PSA in the [Discord](https://discord.gg/W8jXfngc8z) to make sure they don't get another persons account.
-**Sign out** in the settings to delete it.
+## Troubleshooting
 
-Quadra is ***NOT*** affiliated nor endorsed by the Roblox Corporation, nor any siblings of Roblox. We are not liable for any suspensions of your account by using Quadra.
-</details>
+- **Roblox won't start / wrong renderer:** check Settings → Roblox and Settings →
+  Quadra M2VK. Metal (Quadra M2VK) needs a Vulkan-capable GPU.
+- **Missing libraries:** install the dependencies above.
+- **Logs:** `~/.local/share/quadralite/logs/` (or open the logs folder from the
+  launcher menu).
+- **Last error:** `~/.cache/quadralite/last-error.txt`.
 
-<details>
-<summary>Hey.. Something doesn't work! </summary>
+Submit bugs through the upstream report flow or open an issue on this fork.
 
-In the rare, and *scary* event Roblox does not start, the launcher shows the error with a **Copy**
-button. Send it to the [Discord](https://discord.gg/W8jXfngc8z). The last
-error is also saved in `~/.cache/quadrahq/last-error.txt`.
-You can also send things like bug reports (i.e. Camera issues, and rendering bugs [like artifacting].)
-</details>
+## License
 
-<details>
-<summary>How do I sign in?</summary>
-
-Currently, normally logging in will most likely work, though it relies on your distribution. If logging in like this does not work, continue with the following.
-
-Create or log into your Roblox account through a browser, phone, or S[REDACTED]r., then use the Quick Login feature in the login screen. This will show a code.
-Go to your browser or something like S[REDACTED]r and click the gear on the top right of your screen, and type in your code. (i.e. C1D3RHQ)
-</details>
-
-<details>
-<summary>Images or servers do not load</summary>
-
-Some providers make some of Roblox's addresses inaccessible. In Quadra's settings, go to DNS, and choose from the dropdown. Your current options are Google (8.8.8.8), Cloudflare (1.1.1.1), Quad9 (9.9.9.9), and your currrent system-wide DNS. Only Quadra uses it, The rest of your computer keeps it's current DNS.
-
-</details>
-
-<details>
-<summary>OpenGL and Vulkan rendering</summary>
-
-**OpenGL** is the default and uses Roblox's own OpenGL renderer with the host
-OpenGL driver. Quadra hides the Metal device so Roblox selects this path.
-Client startup was verified on NVIDIA OpenGL 4.1 using the client's GLSL shader
-pack.
-
-In **Settings → Environment → Game → Renderer**, choose **Vulkan (Zink,
-experimental)** and restart Roblox. This uses [Mesa Zink](https://docs.mesa3d.org/drivers/zink.html)
-to run the client's OpenGL renderer through Vulkan on Linux. It requires Mesa
-EGL with Zink and a working hardware Vulkan driver. If Mesa EGL or Zink is
-missing, source installations on Arch, Debian/Ubuntu and Fedora install the
-required packages after you authorize an administrator prompt. The launcher
-prefers **run0**; if unavailable, it uses **pkexec**, then **sudo** with a
-graphical password helper, then **sudo** in an available terminal. Cancelling
-authentication stops installation and keeps the previous renderer selected.
-If no supported prompt is available, install the dependencies manually.
-Flatpak graphics libraries come from its runtime; update that runtime if they
-are missing.
-The launcher checks hardware Vulkan support before starting; if that check
-fails, select **OpenGL** again.
-
-Vulkan gameplay is experimental. Client startup
-and the MangoHud Vulkan overlay have been tested on an RTX 3060 Ti, with GL
-tracing disabled. Heavy gameplay and other GPUs still need testing. This uses
-the macOS client's OpenGL renderer.
-
-**Quadra M2VK (experimental)** is available in the same menu in Quadra 0.35.
-This runs Roblox's Metal renderer through the pinned
-[QuadraM2VK](https://github.com/QuadraHQ/QuadraM2VK) fork of metal2vulkan. Existing
-Metal selections automatically use this entry. Native Wayland
-login, home and Write a Letter have been verified on an RTX 3060 Ti.
-Native packages include the prebuilt bridge and its Vulkan/LLVM runtime dependencies; the first launch upgrades the shader cache. Building from source
-requires Rust 1.98+, clang/lld, libLLVM 15+ and a hardware Vulkan driver. Flatpak
-does not include the bridge yet. VR requires OpenGL or Zink; X11 and other GPUs still
-need testing. See the [Metal prototype notes](darling/metal-vulkan/README.md)
-for build commands and validation details.
-
-**Shader preloading** in the same Game settings learns successful Metal pipelines locally
-and prepares them on later launches for the installed client version. A progress dialog
-offers **Skip and play**. **Prepare client shader libraries** also prepares installed
-libraries on the first launch, while **Preload local textures and fonts** warms bounded
-bundled resources. The helper stops on memory pressure, stalled progress, timeout or Skip.
-New shaders and downloaded world assets can still cause work during play. Optional
-**Quadra M2VK performance diagnostics** records bounded timing, memory and cache observations;
-it is off by default. The integrated bridge passed authored software Vulkan and RTX 3060 Ti
-checks, including native Wayland and pipeline reuse. Gameplay reports describe the preceding
-presentation and retention fixes; the new launcher stages have no controlled game FPS result.
-
-With [MangoHud](https://github.com/flightlessmango/MangoHud) installed, enable
-**Settings → Environment → Game → MangoHud overlay** and restart Roblox.
-It works with both OpenGL and Vulkan (Zink) and is off by default. You can also
-start the source launcher with `MANGOHUD=1 ./launcher/quadrahq-launcher`.
-The launcher also forwards `MANGOHUD_CONFIG` and `MANGOHUD_CONFIGFILE` to Roblox.
-For the Flatpak, install the matching MangoHud extension with
-`flatpak install flathub org.freedesktop.Platform.VulkanLayer.MangoHud//26.08`
-for the current experimental recipe. The older 0.19 bundle uses `//25.08`.
-</details>
-
-<details>
-<summary>Select a laptop's dedicated GPU</summary>
-
-If multiple graphics cards are detected, choose one under
-**Settings → Environment → Game → Graphics card**, then restart Roblox.
-The choice applies to OpenGL and Vulkan (Zink). **Automatic** uses your desktop
-or terminal's GPU selection. The selected card needs a working graphics driver
-and must be accessible to the launcher, including inside Flatpak.
-
-Choosing between several proprietary NVIDIA cards with OpenGL requires an
-X11 provider selection. Use **Automatic** with
-`__NV_PRIME_RENDER_OFFLOAD_PROVIDER`, or choose Vulkan (Zink). A laptop with
-one NVIDIA card and an integrated GPU can use the menu with either renderer.
-</details>
-
-<details>
-<summary>Roblox UI is too small on a high DPI monitor</summary>
-
-Set **Settings → Environment → Game → Roblox UI scale** to **200%** for a
-4K display, then restart Roblox. The control accepts 100–400% and keeps the
-display's rendering resolution. Adjust it to suit your monitor.
-
-For a manual settings edit, `"dpi_scale": 2.0` in
-`~/.config/quadrahq/settings.json` selects 200%. The `resolution` key is not
-supported. If you previously added `DFFlagDisableDPIScale`, remove it from your
-custom fast flags before testing scaling.
-
-Custom scaling requires a supported client input layout. If the launch log
-says **UI scale skipped**, the client keeps its original surface scale.
-The scaling handoffs cover pointer movement, clicks and scrolling, including
-the mouse position used during first-person lock. Camera motion retains its
-original relative deltas.
-</details>
-
-<details>
-<summary>Error 256 or an unknown connection error when joining a server</summary>
-
-Update Quadra and restart Roblox. The launcher applies verified RakNet
-compatibility patches for Roblox **0.741.0.7411056**, **0.742.0.7421053**,
-**0.743.0.7431129**, **0.743.0.7431134** and **0.744.0.7441080**. Roblox updates
-can relocate these patches; saved transport flags alone do not prevent the
-connection failure under Darling.
-The launch log includes **RakNet compatibility** and your **CURRENT Roblox version**.
-If compatibility says **unsupported client**, share those lines and the full
-launch log so that deployment can be inspected. Unsupported executables are
-left unchanged.
-
-Quadra also monitors Roblox's actual transport selection during each launch.
-If Roblox selects a transport other than RakNet, Quadra brings the launcher
-forward and warns that games might not work or may show Error 256. The warning
-offers **View log** and **Check for updates**; if no Quadra fix is available yet,
-wait for a compatibility patch. It appears once per launch, including when
-Discord presence is disabled. An unsupported-client header alone does not
-trigger it.
-
-Restoring an older client backup can trigger Roblox's required-update check.
-The launcher follows the deployment requested by the client; downgrading is
-not a lasting repair. If the compatibility patch is already applied and the
-error persists, the full log is needed to diagnose that connection failure.
-</details>
-
-<details>
-<summary>Roblox closes or fails at launch</summary>
-
-Enable **Settings → Environment → Diagnostics → Crash diagnostics**, then
-restart Roblox and collect the entire new launch log. This optional mode
-records fatal signal registers and window-startup call boundaries. It replaces
-the client's fatal signal handlers for that run; turn it off after collecting
-the log. It cannot capture an external kill or every Darling server failure.
-
-For source installations, the same switch is available as:
-
-```bash
-QUADRA_DIAGNOSTIC_SIGNALS=1 ./launcher/quadrahq-launcher
-```
-
-Source checkouts write launch logs to their `logs/` directory; read-only
-packages use `~/.local/share/quadrahq/logs/` by default. For Flatpak,
-use `~/.var/app/wtf.aubree.MacOBlox/data/macoblox/logs/`. Also collect
-`private/var/log/dserver.log` inside the selected Darling prefix: normally
-`~/.darling/`, or `~/.var/app/wtf.aubree.MacOBlox/data/darling/` for Flatpak.
-
-The lifecycle record describes the observed state before cleanup. A final
-`Broken pipe` can follow cleanup and does not identify the original failure.
-
-**Collect diagnostics** (launcher menu, or `quadrahq --collect-diagnostics`)
-writes one archive with the logs, runtime selection and the game's thread
-states. Thread stacks need **Allow freeze diagnostics**
-(`QUADRA_ALLOW_DEBUGGER=1`) turned on before the game starts. Inherited
-`DSERVER_LOG_*` variables are ignored unless `CIDER_KEEP_DSERVER_LOG=1` is
-set; launch logs are capped at 200 MB in total, and `dserver.log` is rotated
-to `dserver.log.old` past 32 MB while Darling is stopped.
-
-**Leaving a game no longer freezes the menu for about 18 s.** Roblox's network loops sleep up to 10 s per wait,
-and after a leave the work they must do next only got noticed when one of them woke by itself. The setting
-`kevent_poll_ms` (default `100`) makes only the game's `RBX IoEvLoop` threads look at their queues every that many
-milliseconds. With it, the game ran at full speed again 2 s after each leave in three of three trials, where it took
-18 s in nine of nine without it, and Play worked 2.8 s after the first leave against 18.2 s. Idle CPU did not rise.
-`"kevent_poll_ms": 0` in `settings.json` turns it off. Close Quadra first, then edit the file: the launcher reads
-the file when it starts and writes its own copy back when it quits. The game log says `kevent waits without UDP
-watches poll every 100 ms` when it is active. It is a workaround for Darling's kqueue emulation, not a repair of it.
-
-**Watch a hang as it happens.** Collect diagnostics shows the game at two
-moments; a stall after joining or leaving a game needs the whole minute.
-With **Allow freeze diagnostics** turned on, run this in a terminal before or
-during the game, play until the stall has happened, then close the game or
-press Ctrl-C:
-
-```bash
-quadrahq --watch-stalls
-```
-
-It records, ten times a second, how much CPU each thread of the game uses;
-for the busy threads it also reads where they are (function and callers), and
-each second it notes where blocked threads wait. The report lines this up with
-the launch log's markers (joining, leaving, swapchain timeouts) and is written
-next to the logs as `stall-watch-*.txt` with the raw `stall-watch-*.jsonl`.
-When the game does almost nothing for three seconds or more, the report adds a
-"lull" section: which thread woke first at the end, what the main thread was
-doing meanwhile, what darlingserver used, and what every blocked thread waited
-on (system call, futex word, timeout). It costs about 2% of one CPU core and
-stops each busy thread, and the main thread while it is not in a futex wait,
-for about a tenth of a millisecond. Send the `.txt` with the launch log;
-`quadrahq --watch-stalls --report FILE.jsonl` prints a report again, and
-`--all` covers the whole capture instead of the join and leave windows.
-
-Submit bugs through [the report page](https://quadrahq.org/report/). Follow its
-collection guide, then attach the matching diagnostics `.tar.gz` and describe
-what happened and how to reproduce it. The form verifies both **Crash
-diagnostics** and **Allow freeze diagnostics** in the archive. Enable them
-before starting the failing run; collect during a freeze or after a crash.
-Keep the archive compressed and check its timestamps. Reports are stored on
-the Quadra VPS and delivered with the log and archive to the Discord report
-channel. Review your files before sharing them. Maintainers can find hosting
-and storage details in [Website hosting](docs/WEBSITE_HOSTING.md).
-
-If no window opens and the log says `Cannot mount overlay: No such device`,
-Darling could not start its app environment. Run `sudo modprobe overlay` on
-that machine, then try again. If the module is missing after a kernel update,
-reboot into the installed kernel. A custom kernel needs `CONFIG_OVERLAY_FS`
-enabled, built in or as an installed module matching the running kernel.
-The following `Cannot open mnt namespace file` is a consequence of the failed
-startup. Quadra now stops at this known warmup failure and shows these steps.
-
-If the log says `app_closed_for_update`, Roblox intentionally closed for a
-required client update. Use **Update Roblox** in the launcher's recovery dialog.
-Setup and routine update checks use the public release channel, regardless of
-saved rollout channels or old logs. The recovery dialog can install the exact
-deployment requested by the running client. **Settings → Roblox → Last client
-channel** shows the last reported or installed channel. A restricted channel
-such as `zbeta` can reject anonymous checks; the client's validated
-required-update response supplies that download instead. Changing a launcher
-configuration value does not change Roblox's account enrollment.
-</details>
-
-<details>
-<summary>No sound with older PipeWire</summary>
-
-PipeWire 1.0.5's `pw-cat` cannot play the launcher's raw audio stream.
-Quadra uses `pacat` through PipeWire's PulseAudio compatibility server on
-these versions. On Mint/Ubuntu/Debian, install it with
-`sudo apt install pulseaudio-utils`, then restart Roblox. The source installer
-includes this package. The launch log records the playback helper and its
-errors.
-</details>
-
-<details>
-<summary>Git LFS credentials during a Darling source build</summary>
-
-Public source downloads do not need a GitHub login. The installer skips
-Darling's optional Swift SDK files from its separate LFS service; the current
-Roblox client does not link that runtime. Source-built Darling therefore does
-not include Swift SDK support. Build dependencies and installing Darling into
-`/usr/local` (regular Darling) or `/opt/ciderdarling/<revision>` (CiderDarling)
-still use sudo.
-</details>
-
-<details>
-<summary>Text disappears while typing</summary>
-
-For a source installation, close the launcher and start it with optional
-selection diagnostics:
-
-```bash
-QUADRA_TRACE_TEXT_INPUT=1 ./launcher/quadrahq-launcher
-```
-
-The trace records text lengths, selection ranges and composition state in
-the launch log, without recording typed content. It is disabled by default.
-</details>
-
-<details>
-<summary>Wayland</summary>
-
-**Settings → Environment → Game → Window backend** defaults to **X11 / Xwayland**.
-Select **Wayland** to use native windows with OpenGL or Vulkan/Zink. Quadra 0.24
-repairs startup and game-join freezes, aligns mouse clicks with the cursor, and
-keeps the outer window size in sync with the game. Backend changes apply on the
-next launch. Quadra 0.25 also applies fullscreen requests made before the native
-window exists, fixing a mismatch where Roblox reported fullscreen while the
-window stayed decorated. Initial fullscreen and repeated toggles are checked
-under KWin at 100% and 150% scaling.
-</details>
-
-<details>
-<summary>VR headsets (experimental)</summary>
-
-Roblox's macOS client still contains Roblox's VR mode; Quadra supplies the
-OpenXR device the Mac build leaves out. Turn on **Settings → VR →
-VR headset (OpenXR)**, start your OpenXR runtime with the headset connected,
-then play. Meta Quest headsets work through [WiVRn](https://github.com/WiVRn/WiVRn);
-PC headsets through [Monado](https://monado.freedesktop.org/). The OpenXR loader
-must be installed (`openxr` on Arch, `libopenxr-loader1` on Debian/Ubuntu).
-
-The VR home menu, games, head tracking, Touch/Index controllers, vibration and
-recentering work. **VR render resolution** trades sharpness for smoothness
-(70% of the headset's recommendation by default), and the game window can
-mirror both eyes. The headset keeps the refresh rate chosen in the runtime.
-Tested on a Quest 2 with WiVRn 26.9. Details are in [docs/VR.md](docs/VR.md).
-</details>
-
-<details>
-<summary>Flatpak (Discontinued)</summary>
-
-The Flatpak brings Darling along and runs it without root (see
-[flatpak/darling-noroot.c](flatpak/darling-noroot.c)), so nothing has to be
-installed on the system. Version 0.22Patch1 does not include a Flatpak bundle, as the Flatpak is temporarily discontinued to focus on better function on the native version.
-The last testing bundle is available in
-[release 0.19](https://github.com/QuadraHQ/Quadra/releases/tag/v0.19):
-
-```bash
-flatpak install --user MacOBlox-0.19-x86_64.flatpak
-```
-
-It keeps its own Darling prefix, so sign in to Roblox again there. The current experimental recipe uses the GNOME 51
-runtime, which supplies GTK 4, libadwaita, Adwaita icons, PyGObject and
-WebKitGTK on top of Freedesktop 26.08. The launcher draws with OpenGL rather
-than Vulkan (set `GSK_RENDERER` to override it); Roblox keeps its renderer
-setting. Graphics drivers and Vulkan layer extensions must match 26.08. To
-build it yourself:
-
-```bash
-flatpak install --user flathub org.flatpak.Builder org.gnome.Platform//51 org.gnome.Sdk//51 org.freedesktop.Sdk.Extension.llvm22//26.08
-cd Quadra/flatpak
-flatpak run --env=FLATPAK_USER_DIR=$HOME/.local/share/flatpak --command=flatpak-builder org.flatpak.Builder --user --install --force-clean build-dir org.quadrahq.Quadra.yml
-```
-</details>
-
-<details>
-<summary>How does it work?</summary>
-
-Darling runs macOS programs on Linux. Roblox needs a few things Darling does not
-have yet, so Quadra adds a small library to the game: it connects the mouse,
-sound, OpenGL (or Vulkan via Zink) and network to Linux and fixes bugs along the way. Details are in
-[docs/NOTES.md](docs/NOTES.md).
-</details>
-
-## Credits
-
-Made by [Narezy](https://github.com/narezy). This version is maintained by
-[aubree.wtf](https://aubree.wtf) and maintainers at QuadraHQ, with stability + performance fixes, and added features.
-
-Quadra is licensed under the [GNU GPL v3](LICENSE). Mac O' Blox, the original code it
-is based on, was released by Narezy under the MIT License; that notice is kept in
-[LICENSES/MIT-MacOBlox.txt](LICENSES/MIT-MacOBlox.txt).
-
-[Darling](https://www.darlinghq.org) ·
-[Comfortaa](https://github.com/alexeiva/comfortaa) font (SIL OFL) ·
-[Archivo](https://github.com/Omnibus-Type/Archivo) and
-[JetBrains Mono](https://github.com/JetBrains/JetBrainsMono) fonts in the launcher (SIL OFL) ·
-icons from [Simple Icons](https://simpleicons.org)
-
-
-> © 2026 QuadraHQ via the GNU General Public License, and Roblox® is a registered trademarked of Roblox Corporation. Quadra and QuadraHQ is not affiliated with, nor endorsed by Roblox Corporation, and any relatives or Roblox Corporation
-
+GPL-3.0-or-later. Roblox® is a registered trademark of Roblox Corporation.
+Quadra Lite is not affiliated with or endorsed by Roblox Corporation.
