@@ -9,8 +9,6 @@ def main(argv=None):
 
     from quadra import paths
 
-    paths.migrate_environment()
-
     # Linux has no LaunchServices. Keep the browser's Roblox argument opaque and
     # let the normal launcher process consume it once Darling is ready. Writing it
     # before starting GTK also covers a second protocol click while the first
