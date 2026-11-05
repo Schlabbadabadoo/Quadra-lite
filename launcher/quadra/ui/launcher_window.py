@@ -1202,9 +1202,28 @@ class LauncherWindow(Adw.ApplicationWindow):
             if session and session.launch_uri:
                 self.pending_uri = session.launch_uri
             self.present_settings()
-            dialogs._error_dialog(
-                self, _("Could not start Roblox"), str(error) or repr(error)
-            )
+            renderer = self.settings.get("renderer", "opengl")
+            if renderer != "opengl":
+                dialog = Adw.AlertDialog(
+                    heading=_("Could not start Roblox"),
+                    body=str(error) or repr(error),
+                )
+                dialog.add_response("close", _("Close"))
+                dialog.add_response("retry", _("Retry with OpenGL"))
+                dialog.set_response_appearance("retry", Adw.ResponseAppearance.SUGGESTED)
+                dialog.set_default_response("retry")
+
+                def on_response(_d, choice):
+                    if choice == "retry":
+                        self.set_setting("renderer", "opengl")
+                        GLib.idle_add(self.play_clicked)
+
+                dialog.connect("response", on_response)
+                dialog.present(self)
+            else:
+                dialogs._error_dialog(
+                    self, _("Could not start Roblox"), str(error) or repr(error)
+                )
             return
         self.session = session
         if self.launch_cancelled:
