@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="branding/quadralite.webp" alt="Quadra Lite" width="160">
-</p>
-
 <h1 align="center">Quadra Lite</h1>
 
 <p align="center">
