@@ -45,9 +45,6 @@ DEFAULT_SETTINGS = {
     "hide_menu_bar": False,
     "dns": "system",
     "dns_custom": "",
-    "show_launcher_after_exit": True,  # legacy: replaced by open_settings_after_exit
-    # Quadra starts Roblox directly behind a small splash; the settings window
-    # opens from the tray icon, the shortcut's "Settings" action or --settings.
     "open_settings_after_exit": False,
     "tray_icon": True,
     "diagnostic_signals": False,
@@ -62,7 +59,6 @@ DEFAULT_SETTINGS = {
     "framerate_cap": 0,
     "hide_launcher_on_launch": False,
     "auto_launch_roblox": False,
-    "show_playtime": True,
     # Sends the game server's IP address to RoValra, so it is opt-in. (The
     # former show_server_location key was saved as true for everyone.)
     "server_location_lookup": False,
@@ -107,13 +103,6 @@ DEFAULT_SETTINGS = {
     "game_update_notice": True,
     "auto_check_roblox_updates": True,
     "auto_check_ciderdarling_updates": True,
-    "mod_death_sound": "default",
-    "mod_custom_death_sound": "",
-    "mod_old_character_sounds": False,
-    "mod_cursor_type": "default",
-    "mod_custom_cursor": "",
-    "mod_custom_font": "",
-    "enable_custom_mods": True,
     # Lets diagnostics read the game's thread stacks under Yama ptrace_scope=1.
     "allow_debugger": False,
     "trace_text_input": False,
