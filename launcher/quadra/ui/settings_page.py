@@ -1129,6 +1129,7 @@ class SettingsPage(Adw.Bin):
         except rosemary_runtime.RosemaryError as error:
             self.rosemary_runner_row.set_subtitle(str(error).splitlines()[0])
             self.rosemary_install_button.set_label(_("Install"))
+        settings = self.window.settings
         self.rosemary_client_row.set_subtitle(
             rosemary_runtime.installed_version(settings) or _("Not installed")
         )
