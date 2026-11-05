@@ -1,4 +1,4 @@
-# Contributing to Quadra
+# Contributing to Quadra Lite
 
 Quadra runs the macOS Roblox client on Linux through [Darling](https://www.darlinghq.org). It is a launcher
 (Python, GTK 4) plus a shim injected into the game, and optionally a Metal-on-Vulkan renderer. Bug reports,
@@ -10,7 +10,7 @@ license. The notice for Mac O' Blox, the MIT-licensed code Quadra started from, 
 
 ## Reporting a bug
 
-Use the [bug report form](https://github.com/QuadraHQ/Quadra/issues/new/choose) and attach the
+Use the [bug report form](https://github.com/Schlabbadabadoo/Quadra-Lite/issues/new/choose) and attach the
 **diagnostics archive from the run that failed** (menu → **Collect diagnostics**). For a crash, turn on
 **Settings → Environment → Diagnostics → Crash diagnostics** and **Allow freeze diagnostics** before you start
 Roblox. For a freeze, collect while the game is still frozen. Without a log from the failing launch there is
@@ -40,16 +40,13 @@ new language.
 
 | Path | What |
 |---|---|
-| `launcher/quadra/` | The launcher and everything both runtimes share: settings, the window, Roblox install and update, diagnostics, VR settings, mods |
+| `launcher/quadra/` | The launcher and everything both runtimes share: settings, the window, Roblox install and update, diagnostics |
 | `launcher/quadra/darling/` | Launcher code that only the Darling runtime uses: runtime selection and installation, client patches, the web sign-in bridge, stall watching |
-| `launcher/quadra/rosemary/` | Launcher code that only the Rosemary runtime uses: installing Rosemary and its Roblox client, starting a session, VR |
+| `launcher/quadra/rosemary/` | Launcher code that only the Rosemary runtime uses: installing Rosemary and its Roblox client, starting a session |
 | `darling/` | Everything native that only Darling needs ([README](darling/README.md)): `shim/` is injected into Roblox, `frameworks/` holds stub frameworks, `metal-vulkan/` is Metal on Vulkan |
-| `rosemary/` | Everything native that only Rosemary needs ([README](rosemary/README.md)): `vr/` builds the VR library Rosemary injects |
-| `vr/` | The OpenXR VR device, compiled into both the Darling shim and Rosemary's VR library ([README](vr/README.md)) |
-| `packaging/`, `flatpak/`, `flake.nix` | AUR, Debian, RPM, Nix and Flatpak recipes |
+| `rosemary/` | Everything native that only Rosemary needs ([README](rosemary/README.md)) |
 | `tests/` | Native and Python tests |
-| `docs/` | Design notes, runtime notes, bug triage records |
-| `install.sh`, `build_debug_shim.sh`, `run_debug.sh`, `launcher/install.sh` | The source installer, the shim build and debug run, and the launcher installer. They stay at the top because packaging and the installer look for them there |
+| `install.sh`, `uninstall.sh`, `build_debug_shim.sh`, `run_debug.sh`, `launcher/install.sh` | The source installer/uninstaller, the shim build and debug run, and the launcher installer. They stay at the top because packaging and the installer look for them there |
 
 The Darling runtime is a separate repository, [QuadraHQ/CiderDarling](https://github.com/QuadraHQ/CiderDarling),
 and the Metal translator is [QuadraHQ/QuadraM2VK](https://github.com/QuadraHQ/QuadraM2VK). Fixes that belong
@@ -58,8 +55,7 @@ there should go there.
 ## Building
 
 You need an x86_64 Linux machine with clang, lld and a Darling runtime to build the shim. Running the launcher
-from source also needs Python 3, GTK 4, libadwaita and WebKitGTK 6. The [packaging README](packaging/README.md)
-lists the full requirements and versions.
+from source also needs Python 3, GTK 4, libadwaita and WebKitGTK 6.
 
 ```bash
 ./build_debug_shim.sh                      # the Darling shim; set DARLING_SYSROOT to pick a sysroot
