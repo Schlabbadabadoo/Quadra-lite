@@ -33,7 +33,6 @@ def _shim_sources_hash():
     for path in sorted(
         [
             *(locations.PROJECT / "darling" / "shim").glob("*"),
-            *(locations.PROJECT / "vr").glob("*"),
             *(locations.PROJECT / "darling" / "frameworks").glob("*"),
             locations.BUILD_SCRIPT,
         ]

@@ -11,14 +11,12 @@ from .. import (
     activity,
     backends,
     core,
-    discord,
     fflag_allowlist,
+    game_info,
     game_meta,
     history,
     i18n,
     logevents,
-    modguard,
-    mods,
     region,
     theme,
 )
@@ -31,7 +29,6 @@ from . import (
     boot_splash,
     dialogs,
     info_page,
-    mods_page,
     play_page,
     servers_page,
     settings_page,
@@ -69,10 +66,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.game_tracker = None
         self.current_game_info = None
         self.game_started_at = None
-        self._playtime_clock = 0.0
-        self._playtime_before_session = 0
-        self._playtime_saved_at = 0.0
-        self._rpc_retry_at = 0.0
         self._watch_inflight = None
         self._activity_join = None
         self._shader_preload_session = None
@@ -183,11 +176,6 @@ class LauncherWindow(Adw.ApplicationWindow):
             lambda _key, appearance: self._show_launcher_appearance(appearance),
         )
         watch("language", lambda _key, code: self._show_language(code))
-        watch("discord_rpc", lambda _key, enabled: self._follow_discord_rpc(enabled))
-        watch(
-            ("discord_rpc_game", "discord_rpc_icon", "discord_rpc_time"),
-            lambda _key, _value: self._refresh_rpc_presence(),
-        )
 
     @staticmethod
     def _cider_pin_for(release):
@@ -537,10 +525,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.stack.add_titled_with_icon(
             self.servers_page, "servers", _("Servers"), "network-server-symbolic"
         )
-        self.mods_page = mods_page.ModsPage(self)
-        self.stack.add_titled_with_icon(
-            self.mods_page, "mods", _("Mods"), "application-x-addon-symbolic"
-        )
         self.info_page = info_page.InfoPage(self)
         self.stack.add_titled_with_icon(
             self.info_page, "info", _("Info"), "help-about-symbolic"
@@ -549,7 +533,7 @@ class LauncherWindow(Adw.ApplicationWindow):
 
         if page == "ciderdarling":
             self.show_ciderdarling_settings()
-        elif page in ("flags", "env", "m2vk", "roblox", "vr"):
+        elif page in ("flags", "env", "m2vk", "roblox"):
             self.stack.set_visible_child_name("settings")
             self.settings_page.set_tab(page)
         elif self.stack.get_child_by_name(page) is not None:
@@ -621,8 +605,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.content_stack.add_named(responsive_split, "launcher")
         self.content_stack.add_named(self.setup, "setup")
         self.backdrops = Gtk.Stack()
-        self.backdrops.add_named(theme.GridBackdrop(), "grid")
-        self.backdrops.add_named(theme.Backdrop(), "monochrome")
         self.backdrops.add_named(Gtk.Box(), "gnome")
         self.wallpaper = Gtk.Overlay(child=self.backdrops)
         self.wallpaper.add_overlay(self.content_stack)
@@ -645,13 +627,10 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.play_page.logs_view.reset(self.session.log_path)
 
     def apply_launcher_appearance(self):
-        appearance = self.settings.get("launcher_appearance", "gnome")
-        custom = appearance != "gnome"
-        self.backdrops.set_visible_child_name(appearance)
+        appearance = "gnome"
+        self.backdrops.set_visible_child_name("gnome")
         self.appearance_layer.set_appearance(appearance)
-        self.settings_page.appearance_tabs.set_visible_child_name(
-            "custom" if custom else "gnome"
-        )
+        self.settings_page.appearance_tabs.set_visible_child_name("gnome")
         for widget, css in (
             (self, "launcher-custom"),
             (self.content_stack, "launcher-shell"),
@@ -659,11 +638,11 @@ class LauncherWindow(Adw.ApplicationWindow):
             (self.brand_label, "launcher-brand"),
             (self.launcher_header, "launcher-header"),
         ):
-            (widget.add_css_class if custom else widget.remove_css_class)(css)
+            widget.remove_css_class(css)
         self.play_page.set_appearance(appearance)
 
     def set_launcher_appearance(self, appearance):
-        if appearance in ("grid", "gnome", "monochrome"):
+        if appearance == "gnome":
             self.set_setting("launcher_appearance", appearance)
 
     def _show_launcher_appearance(self, appearance):
@@ -1214,123 +1193,6 @@ class LauncherWindow(Adw.ApplicationWindow):
             self.web.stop()
             self.web = None
 
-    def _follow_discord_rpc(self, enabled):
-        if not enabled:
-            self._stop_rpc()
-        elif self.session:
-            self._start_rpc()
-
-    def _on_game_activity_change(self, info: dict | None, session, tracker, generation):
-        # The log and metadata workers only enqueue; GTK-owned state changes
-        # after checking that this callback still belongs to the active launch.
-        GLib.idle_add(
-            self._apply_game_activity_change, info, session, tracker, generation
-        )
-
-    def _apply_game_activity_change(self, info, session, tracker, generation):
-        if (
-            self.session is not session
-            or self.game_tracker is not tracker
-            or not self.settings.get("discord_rpc", True)
-            or not tracker.is_current_generation(generation)
-        ):
-            return False
-        self.current_game_info = info
-        self._refresh_rpc_presence()
-        return False
-
-    def _refresh_rpc_presence(self):
-        if not self.session or not self.settings.get("discord_rpc", True):
-            return False
-        if self.rpc is None or self.rpc.closed:
-            try:
-                self.rpc = discord.DiscordRPC()
-            except RuntimeError as error:
-                print("Could not start Discord presence worker:", error)
-                return False
-        rpc = self.rpc
-        start = (
-            self.game_started_at or time.time()
-            if self.settings.get("discord_rpc_time", True)
-            else None
-        )
-        info = self.current_game_info
-        brand = f"Quadra {__version__}"
-        large_image, large_text = discord.LOGO, brand
-        small_image = small_text = None
-        buttons = [(_("Get Quadra"), discord.WEBSITE_URL)]
-
-        if (
-            info
-            and not info.get("loading")
-            and self.settings.get("discord_rpc_game", True)
-        ):
-            details = info.get("name", _("Playing Roblox"))
-            creator = info.get("creator")
-            state = _("by {creator}", creator=creator) if creator else _("In Game")
-            icon_url = info.get("icon_url")
-            if self.settings.get("discord_rpc_icon", False) and icon_url:
-                large_image, large_text = icon_url, details
-                small_image, small_text = discord.LOGO, brand
-            if info.get("place_id"):
-                buttons.insert(
-                    0,
-                    (
-                        _("Game page"),
-                        f"https://www.roblox.com/games/{info['place_id']}",
-                    ),
-                )
-        elif info:
-            # Game is active (either fetching details or user hid experience name in settings)
-            details = _("Playing Roblox")
-            state = _("In Game")
-        else:
-            # Menu (not in an experience)
-            details = _("In Main Menu")
-            state = None
-
-        rpc.queue_presence(
-            details=details,
-            state=state,
-            start_time=start,
-            large_image=large_image,
-            large_text=large_text,
-            small_image=small_image,
-            small_text=small_text,
-            buttons=buttons,
-        )
-        return False
-
-    def _start_rpc(self):
-        session = self.session
-        if not session or not self.settings.get("discord_rpc", True):
-            return
-        if self.game_tracker is None and session.log_path:
-            tracker = discord.GameActivityTracker(
-                session.game_log if hasattr(session, "game_log") else session.log_path,
-                lambda info, generation: self._on_game_activity_change(
-                    info, session, tracker, generation
-                ),
-                autostart=False,
-            )
-            self.game_tracker = tracker
-            try:
-                tracker.start()
-            except RuntimeError as error:
-                self.game_tracker = None
-                print("Could not start Discord game tracker:", error)
-        self._refresh_rpc_presence()
-
-    def _stop_rpc(self):
-        tracker, self.game_tracker = self.game_tracker, None
-        if tracker:
-            tracker.stop()
-        self.current_game_info = None
-        if self.rpc:
-            rpc = self.rpc
-            self.rpc = None
-            rpc.close()
-
     def _started(self, session, error):
         self.busy = None
         self.quit_when_idle = False  # a game or an error to show: stay
@@ -1344,7 +1206,6 @@ class LauncherWindow(Adw.ApplicationWindow):
                 self, _("Could not start Roblox"), str(error) or repr(error)
             )
             return
-        self._stop_rpc()
         self.session = session
         if self.launch_cancelled:
             # Cancelled while it was starting: end it as soon as it is up.
@@ -1370,20 +1231,12 @@ class LauncherWindow(Adw.ApplicationWindow):
             uri_handoff.clear_pending(session.launch_uri)
             self.pending_uri = uri_handoff.peek_pending()
         self.last_log = session.log_path
-        self.game_started_at = time.time()
-        self._playtime_clock = time.monotonic()
-        self._playtime_saved_at = self._playtime_clock
-        self._playtime_before_session = int(self.settings.get("playtime_seconds", 0))
-        self._rpc_retry_at = self._playtime_clock + 5
-        self.current_game_info = None
         self._notified_server_ip = None
         self._start_activity(session)
         if int(self.settings.get("roblox_cpu_limit", 0) or 0) > 0:
             GLib.timeout_add_seconds(10, self._limit_cpus, session)
         self.play_page.logs_view.reset(session.log_path)
         self.play_page.logs_view.update()
-        if self.settings.get("discord_rpc", True):
-            self._start_rpc()
         # Hide once the game window has had time to appear.
         GLib.timeout_add_seconds(3, self._hide_while_playing)
         GLib.timeout_add(1000, self._watch, session)
@@ -1631,7 +1484,7 @@ class LauncherWindow(Adw.ApplicationWindow):
 
     def _name_joined_game(self, place_id):
         try:
-            info = discord.fetch_game_info(int(place_id))
+            info = game_info.fetch_game_info(int(place_id))
         except Exception:
             return
         if (
@@ -1683,28 +1536,6 @@ class LauncherWindow(Adw.ApplicationWindow):
         self.servers_page.refresh()
         return False
 
-    def _settle_mod_guard(self, status):
-        """A crash soon after new mods were applied sets those mods aside."""
-        if not self.settings.get("enable_custom_mods", True):
-            return
-        try:
-            crashed = status not in (0, -1)
-            set_aside = modguard.end_session(
-                core.CONFIG_DIR, mods.MODS_DIR, crashed=crashed
-            )
-        except Exception as error:
-            print("Mod crash guard failed:", error)
-            return
-        if set_aside:
-            modguard.clear_notice(core.CONFIG_DIR)
-            dialogs._toast(
-                self.toasts,
-                _(
-                    "Roblox crashed soon after new mods were applied. Set aside: {names}"
-                ).format(names=", ".join(set_aside)),
-            )
-            self.mods_page.refresh_guard()
-
     def _watch_result(self, session, status):
         """Apply worker results on GTK's thread after polling/cleanup returns."""
         if self._watch_inflight is session:
@@ -1713,21 +1544,14 @@ class LauncherWindow(Adw.ApplicationWindow):
             return False
         self._show_transport_warning(session)
         if status is None:
-            self._count_playtime()
             if self.play_page.stack.get_visible_child_name() == "logs":
                 self.play_page.logs_view.update()
-            # Retry RPC connection if Discord was launched after the game
-            if self.settings.get("discord_rpc", True):
-                self._retry_rpc()
             return False
-        self._count_playtime()
         self.session = None
         self._stop_web()
-        self._stop_rpc()
         self._stop_activity()
         self.play_page.logs_view.stop_server_location_polling()
         self.settings.save()
-        self._settle_mod_guard(status)
         # Roblox's macOS updater cannot reliably replace the host bundle through
         # Darling. It exits with success/a quit sentinel, so this is independent
         # of the frontend exit code and must precede pending-URI auto-retries.
@@ -1787,21 +1611,6 @@ class LauncherWindow(Adw.ApplicationWindow):
                     self.toasts, _("Roblox exited with code {status}", status=status)
                 )
         return False
-
-    def _count_playtime(self):
-        played = int(time.monotonic() - self._playtime_clock)
-        self.settings.stage("playtime_seconds", self._playtime_before_session + played)
-        if time.monotonic() - self._playtime_saved_at > 15:
-            self._playtime_saved_at = time.monotonic()
-            self.settings.save()
-
-    def _retry_rpc(self):
-        if self.rpc is not None and self.rpc.connected:
-            return
-        if time.monotonic() < self._rpc_retry_at:
-            return
-        self._rpc_retry_at = time.monotonic() + 5
-        self._start_rpc()
 
     def _mangohud_crash_dialog(self):
         dialog = Adw.AlertDialog(

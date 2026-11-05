@@ -8,7 +8,7 @@ class SettingsStoreTests(unittest.TestCase):
     def setUp(self):
         self.saved = []
         self.store = core.SettingsStore(
-            {"renderer": "opengl", "playtime_seconds": 0, "mangohud": False},
+            {"renderer": "opengl", "mangohud": False},
             save=self.saved.append,
         )
 
@@ -42,12 +42,12 @@ class SettingsStoreTests(unittest.TestCase):
 
     def test_stage_notifies_without_saving_until_save(self):
         changes = []
-        self.store.watch("playtime_seconds", lambda key, value: changes.append(value))
-        self.store.stage("playtime_seconds", 60)
-        self.assertEqual(changes, [60])
+        self.store.watch("mangohud", lambda key, value: changes.append(value))
+        self.store.stage("mangohud", True)
+        self.assertEqual(changes, [True])
         self.assertEqual(self.saved, [])
         self.store.save()
-        self.assertEqual(self.saved[-1]["playtime_seconds"], 60)
+        self.assertEqual(self.saved[-1]["mangohud"], True)
 
     def test_unsubscribing_stops_notifications(self):
         changes = []

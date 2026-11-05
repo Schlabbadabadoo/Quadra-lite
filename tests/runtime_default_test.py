@@ -40,16 +40,16 @@ class RuntimeDefaultTests(unittest.TestCase):
         self.assertEqual(self.backend("[1, 2]"), "rosemary")
 
     def test_settings_saved_before_the_choice_existed_stay_on_darling(self):
-        self.assertEqual(self.backend(json.dumps({"vr": False, "renderer": "opengl"})), "darling")
+        self.assertEqual(self.backend(json.dumps({"renderer": "opengl"})), "darling")
 
     def test_a_saved_choice_wins(self):
-        self.assertEqual(self.backend(json.dumps({"runtime_backend": "rosemary", "vr": True})), "rosemary")
+        self.assertEqual(self.backend(json.dumps({"runtime_backend": "rosemary", "renderer": "opengl"})), "rosemary")
         self.assertEqual(self.backend(json.dumps({"runtime_backend": "darling"})), "darling")
 
     def test_other_settings_still_load_over_the_defaults(self):
-        self.file.write_text(json.dumps({"runtime_backend": "rosemary", "vr": True, "keep_logs": 7}))
+        self.file.write_text(json.dumps({"runtime_backend": "rosemary", "renderer": "opengl", "keep_logs": 7}))
         settings = core.load_settings()
-        self.assertTrue(settings["vr"])
+        self.assertEqual(settings["renderer"], "opengl")
         self.assertEqual(settings["keep_logs"], 7)
         self.assertEqual(settings["dns"], core.DEFAULT_SETTINGS["dns"])
 

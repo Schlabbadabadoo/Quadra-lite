@@ -234,9 +234,6 @@ class RobloxSession:
             variables.append(f"QUADRA_VRAM_BYTES={vram}")
         if self.settings.get("hide_menu_bar"):
             variables.append("QUADRA_HIDE_MENU_BAR=1")
-        from .. import vr
-
-        variables.extend(vr.shim_variables(self.settings)[0])
         if not self.settings.get("raw_mouse", True):
             variables.append("QUADRA_RAW_MOUSE=0")
         if self.settings.get("framerate_cap", 0) > 0:
@@ -499,16 +496,6 @@ class RobloxSession:
         from .. import uri
 
         uri.expire_pending()
-        try:
-            from .. import mods
-
-            mods.apply_mods(self.settings)
-            if self.settings.get("enable_custom_mods", True):
-                from .. import modguard
-
-                modguard.begin_session(locations.CONFIG_DIR, mods.MODS_DIR)
-        except Exception as e:
-            logging.getLogger("quadra").warning("Failed to apply mods: %s", e)
         roblox.apply_throttle_patch()
         transport_status = roblox.ensure_raknet_transport()
         shader_status = roblox.ensure_shader_compatibility()
@@ -557,9 +544,6 @@ class RobloxSession:
             log.write(
                 f"MangoHud requested: {'Enabled' if self.settings.get('mangohud', False) else 'Disabled'}\n".encode()
             )
-            from .. import vr
-
-            log.write(f"{vr.shim_variables(self.settings)[1]}\n".encode())
             log.write(
                 f"Window backend: {'Wayland' if env.get('QUADRA_WAYLAND') == '1' else 'X11 / Xwayland'}\n".encode()
             )

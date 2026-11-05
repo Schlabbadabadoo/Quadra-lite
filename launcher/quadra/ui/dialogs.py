@@ -1,4 +1,4 @@
-"""Toasts and the dialogs every page uses: the copyable error dialog and the VR warning."""
+"""Toasts and the dialogs every page uses: the copyable error dialog."""
 
 from gi.repository import Adw, Gio, GLib, Gtk
 
@@ -10,7 +10,6 @@ __all__ = [
     "_choose_file",
     "_error_dialog",
     "_toast",
-    "_vr_warning_dialog",
 ]
 
 CLOSED_WITHOUT_A_FILE = (Gtk.DialogError.CANCELLED, Gtk.DialogError.DISMISSED)
@@ -100,32 +99,3 @@ def _error_dialog(window, heading, details):
     dialog.connect("response", response)
     dialog.present(window)
 
-
-def _vr_warning_dialog(window, accepted):
-    dialog = Adw.AlertDialog(
-        heading=_("Turn on VR?"),
-        body=_(
-            "VR mode patches the Roblox client's memory while the game runs. "
-            "You could get flagged by Roblox's anti-cheat for it. The chance is low, but it is not "
-            "known how low.\n\nTurn it on only if you accept that risk."
-        ),
-    )
-    hide = Adw.SwitchRow(title=_("Don't show this again"))
-    group = Adw.PreferencesGroup()
-    group.add(hide)
-    dialog.set_extra_child(group)
-    dialog.add_response("cancel", _("Cancel"))
-    dialog.add_response("enable", _("Turn on VR"))
-    dialog.set_response_appearance("enable", Adw.ResponseAppearance.DESTRUCTIVE)
-    dialog.set_default_response("cancel")
-    dialog.set_close_response("cancel")
-
-    def response(_dialog, choice):
-        if choice != "enable":
-            return
-        if hide.get_active():
-            window.set_setting("vr_warning_hidden", True)
-        accepted()
-
-    dialog.connect("response", response)
-    dialog.present(window)

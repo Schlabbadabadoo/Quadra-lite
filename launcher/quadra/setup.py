@@ -295,7 +295,7 @@ class SetupWizard(Adw.Bin):
         self.quadra_rosemary_row = Adw.SwitchRow(
             title=_("Use Quadra’s Rosemary"),
             subtitle=_(
-                "Quadra downloads and updates its own build, which adds VR. "
+                "Quadra downloads and updates its own build. "
                 "Turn it off to use a Rosemary you installed yourself."
             ),
             active=not self.own_rosemary,

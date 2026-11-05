@@ -11,7 +11,6 @@ __all__ = [
     "TRACE_ENV",
     "TRACE_ENV_INHERITED",
     "clear_last_error",
-    "format_playtime",
     "load_settings",
     "save_settings",
 ]
@@ -43,12 +42,6 @@ DEFAULT_SETTINGS = {
     "gpu": "auto",
     "roblox_channel": "",
     "mangohud": False,
-    # VR through the host's OpenXR runtime (see vr.py); experimental.
-    "vr": False,
-    "vr_render_scale": 70,
-    "vr_mirror": True,
-    # Set from the warning shown before VR is first turned on ("Don't show this again").
-    "vr_warning_hidden": False,
     "hide_menu_bar": False,
     "dns": "system",
     "dns_custom": "",
@@ -88,7 +81,7 @@ DEFAULT_SETTINGS = {
     "setup_darling_variant": "",
     "rosemary_program": "",
     "rosemary_runners": [],
-    # Which Rosemary Quadra installs: "quadra" (its own build, adds VR) or "upstream" (the regular one).
+    # Which Rosemary Quadra installs: "quadra" (its own build) or "upstream" (the regular one).
     "rosemary_source": "quadra",
     "rosemary_prefix": "",
     "rosemary_clear_cache_on_launch": False,
@@ -107,17 +100,10 @@ DEFAULT_SETTINGS = {
     "rosemary_plain_ctrl_click": False,
     # Key of an installed build to stay on (a rollback); empty follows Roblox's latest.
     "rosemary_pinned_build": "",
-    # VR on Rosemary: run Roblox's OpenGL through Mesa's zink (on Vulkan) instead of the driver's own GL.
-    "rosemary_vr_zink": False,
     "region_join": False,
     "region_preferred": "",
     # A toast when the game you joined was updated in the last day.
     "game_update_notice": True,
-    "playtime_seconds": 0,
-    "discord_rpc": True,
-    "discord_rpc_game": True,
-    "discord_rpc_icon": False,
-    "discord_rpc_time": True,
     "auto_check_roblox_updates": True,
     "auto_check_ciderdarling_updates": True,
     "mod_death_sound": "default",
@@ -173,7 +159,7 @@ def load_settings():
         if key == "launcher_appearance":
             settings[key] = (
                 value
-                if isinstance(value, str) and value in ("grid", "gnome", "monochrome")
+                if isinstance(value, str) and value == "gnome"
                 else DEFAULT_SETTINGS[key]
             )
             continue
@@ -211,15 +197,3 @@ def clear_last_error():
     except OSError:
         pass
 
-
-def format_playtime(seconds: int) -> str:
-    """Format playtime in seconds into a concise string like '1M', '2H 15M'."""
-    seconds = max(0, int(seconds))
-    total_mins = seconds // 60
-    if total_mins < 60:
-        return f"{max(1, total_mins)}M" if seconds >= 60 else "0M"
-    hours = total_mins // 60
-    mins = total_mins % 60
-    if mins:
-        return f"{hours}H {mins}M"
-    return f"{hours}H"

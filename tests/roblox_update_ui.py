@@ -31,7 +31,7 @@ stale.write_text('[FLog::UpdateController] UpdateController: versionQueryUrl: '
                  '[FLog::UpdateController] version response: '
                  + json.dumps(dict(release, version='0.745.0.7450000'))
                  + '\nflow end: app_closed_for_update\n')
-settings = dict(core.DEFAULT_SETTINGS, roblox_channel='zbeta', discord_rpc=False, runtime_backend='darling')
+settings = dict(core.DEFAULT_SETTINGS, roblox_channel='zbeta', runtime_backend='darling')
 
 def response(url, **kwargs):
     assert url == core.VERSION_URL, url  # a gated request must fail this regression

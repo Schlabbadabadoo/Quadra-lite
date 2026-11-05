@@ -11,7 +11,6 @@ from ..darling import runtime, runtime_updates
 from ..i18n import _
 from ..rosemary import install as rosemary_install
 from ..rosemary import runtime as rosemary_runtime
-from ..rosemary import xr as rosemary_xr
 from . import dialogs, flags_page, system, widgets
 
 __all__ = [
@@ -123,22 +122,6 @@ class SettingsPage(Adw.Bin):
             lambda row, _pspec: window.set_language(codes[row.get_selected()]),
         )
         interface.add(language)
-        self.appearance_codes = ("grid", "gnome", "monochrome")
-        self.appearance_row = widgets.ComboRow(
-            title=_("Launcher appearance"),
-            subtitle=_("Applies immediately. GNOME follows your system appearance."),
-            model=Gtk.StringList.new(
-                [_("Grid"), _("GNOME (classic)"), _("Monochrome · aubree.lat")]
-            ),
-        )
-        widgets.bind_combo(
-            window,
-            self.appearance_row,
-            "launcher_appearance",
-            self.appearance_codes,
-            "gnome",
-        )
-        interface.add(self.appearance_row)
         tray_switch = Adw.SwitchRow(
             title=_("Tray icon"),
             subtitle=_(
@@ -348,12 +331,6 @@ class SettingsPage(Adw.Bin):
         )
         game.add(widgets.bind_switch(window, reopen, "open_settings_after_exit"))
 
-        playtime_switch = Adw.SwitchRow(
-            title=_("Show playtime"),
-            subtitle=_("Show accumulated playtime on the Play page"),
-        )
-        game.add(widgets.bind_switch(window, playtime_switch, "show_playtime", True))
-
         server_location = Adw.SwitchRow(
             title=_("Show server location"),
             subtitle=_(
@@ -391,121 +368,7 @@ class SettingsPage(Adw.Bin):
         self.m2vk_page.add(graphics_group)
         self.m2vk_page.add(self.m2vk_group)
 
-        # VR headsets through the host's OpenXR runtime (the VR tab)
-        from .. import vr
-
-        vr_group = Adw.PreferencesGroup(
-            title=_("VR headset"),
-            description=_(
-                "Experimental. Plays in Roblox's own VR mode on a headset connected through an OpenXR "
-                "runtime such as WiVRn (Meta Quest) or Monado. Applies on next launch."
-            ),
-        )
-        _runtime, vr_status = vr.status()
-        vr_switch = Adw.SwitchRow(
-            title=_("VR headset (OpenXR)"),
-            subtitle=vr_status,
-            active=settings.get("vr", False),
-        )
-        vr_scale = Adw.SpinRow.new_with_range(40, 150, 5)
-        vr_scale.set_digits(0)
-        vr_scale.set_title(_("VR render resolution"))
-        vr_scale.set_subtitle(
-            _("Percent of the headset's recommended size per eye. Lower is smoother.")
-        )
-        widgets.bind_spin(
-            window,
-            vr_scale,
-            "vr_render_scale",
-            vr.DEFAULT_RENDER_SCALE,
-            to_setting=vr.validated_render_scale,
-            to_row=vr.validated_render_scale,
-        )
-        vr_mirror = Adw.SwitchRow(
-            title=_("Show the headset view in the game window"),
-            subtitle=_(
-                "Both eyes side by side on the desktop. Off saves a little time per frame."
-            ),
-        )
-        widgets.bind_switch(window, vr_mirror, "vr_mirror", True)
-
-        def vr_toggled(row, _pspec=None):
-            vr_scale.set_sensitive(row.get_active())
-            vr_mirror.set_sensitive(row.get_active())
-
-        confirmed = [False]
-
-        def vr_changed(row, _pspec=None):
-            # Turning VR on asks first (unless "Don't show this again" was kept): the switch goes back to off
-            # and only the dialog's go-ahead turns it on, so VR is never saved as on without the warning.
-            if (
-                row.get_active()
-                and not confirmed[0]
-                and not window.settings.get("vr_warning_hidden", False)
-            ):
-                row.set_active(False)
-
-                def accepted():
-                    confirmed[0] = True
-                    row.set_active(True)
-                    confirmed[0] = False
-
-                dialogs._vr_warning_dialog(window, accepted)
-                return
-            window.set_setting("vr", row.get_active())
-            vr_toggled(row)
-
-        vr_switch.connect("notify::active", vr_changed)
-        vr_toggled(vr_switch)
-        for row in (vr_switch, vr_scale, vr_mirror):
-            vr_group.add(row)
-        # Its own tab, added after Roblox below.
-        self.vr_page = Adw.PreferencesPage()
-        self.vr_page.add(vr_group)
-        window.runtime_only(self.vr_page, "vr")
-
-        # 3. Discord Rich Presence
-        discord_group = Adw.PreferencesGroup(title=_("Discord Rich Presence"))
-
-        discord_rpc = Adw.SwitchRow(
-            title=_("Enable Discord Rich Presence"),
-            subtitle=_("Show current game and playtime in your Discord status"),
-        )
-        discord_group.add(widgets.bind_switch(window, discord_rpc, "discord_rpc", True))
-        discord_options = []
-        for key, title, subtitle, default in (
-            (
-                "discord_rpc_game",
-                _("Show experience name in Discord"),
-                _("Display the title and creator of the place you are playing"),
-                True,
-            ),
-            (
-                "discord_rpc_icon",
-                _("Show experience thumbnail in Discord"),
-                _("Replace the Quadra icon with the game's icon"),
-                False,
-            ),
-            (
-                "discord_rpc_time",
-                _("Show elapsed time in Discord"),
-                _("Display how long you have been playing in your status"),
-                True,
-            ),
-        ):
-            option = Adw.SwitchRow(title=title, subtitle=subtitle)
-            discord_group.add(widgets.bind_switch(window, option, key, default))
-            discord_options.append(option)
-
-        def show_discord_options(_key, enabled):
-            for option in discord_options:
-                option.set_sensitive(enabled)
-
-        show_discord_options("discord_rpc", settings.get("discord_rpc", True))
-        window.watch_setting("discord_rpc", show_discord_options)
-
-        self.env_page.add(discord_group)
-
+        # 3. DNS for Roblox
         dns_group = Adw.PreferencesGroup(
             title=_("DNS for Roblox"),
             description=_(
@@ -694,8 +557,6 @@ class SettingsPage(Adw.Bin):
         self.stack.add_titled_with_icon(
             self.roblox_page, "roblox", "Roblox", "application-x-executable-symbolic"
         )
-
-        self.stack.add_titled_with_icon(self.vr_page, "vr", "VR", "quadra-vr-symbolic")
 
         # 3. Fast flags page
         self.flags_page = flags_page.FlagsPage(window)
@@ -895,7 +756,6 @@ class SettingsPage(Adw.Bin):
             runtime.save_selection(choice, current=core.DARLING_RUNTIME)
             saved = True
             self.window._stop_web()
-            self.window._stop_rpc()
             system._restart_launcher()
         except (OSError, RuntimeError, ValueError) as error:
             self.window.end(resume_pending=False)
@@ -928,7 +788,6 @@ class SettingsPage(Adw.Bin):
             runtime.save_selection(choice, current=core.DARLING_RUNTIME)
             saved = True
             self.window._stop_web()
-            self.window._stop_rpc()
             system._restart_launcher()
         except (OSError, RuntimeError, ValueError) as error:
             details = str(error)
@@ -969,10 +828,10 @@ class SettingsPage(Adw.Bin):
         self.rosemary_source_row = widgets.ComboRow(
             title=_("Rosemary build"),
             subtitle=_(
-                "Quadra's build adds what VR needs; the regular one is microlift's. Quadra installs the one you pick."
+                "Quadra's build or the regular one, from microlift. Quadra installs the one you pick."
             ),
             model=Gtk.StringList.new(
-                [_("Quadra's Rosemary (adds VR)"), _("Regular Rosemary")]
+                [_("Quadra's Rosemary"), _("Regular Rosemary")]
             ),
         )
         self.rosemary_source_row.set_selected(
@@ -1149,13 +1008,6 @@ class SettingsPage(Adw.Bin):
         ):
             row = Adw.SwitchRow(title=title, subtitle=subtitle or "")
             options.add(widgets.bind_switch(window, row, key))
-        zink = Adw.SwitchRow(
-            title=_("VR: OpenGL through Vulkan (zink)"),
-            subtitle=_(
-                "Roblox's VR needs its OpenGL renderer; this runs it on Vulkan with Mesa's zink"
-            ),
-        )
-        options.add(widgets.bind_switch(window, zink, "rosemary_vr_zink"))
         server = Adw.SwitchRow(
             title=_("Process server"),
             subtitle=_("Stopped with the game; turn off to leave it running"),
@@ -1188,9 +1040,6 @@ class SettingsPage(Adw.Bin):
         client_progress = Gtk.ProgressBar(show_text=True, visible=False, margin_top=6)
         client_group.add(client_progress)
         self.rosemary_progress_bars.append(client_progress)
-
-        self.rosemary_vr_row = Adw.ActionRow(title=_("VR support"))
-        client_group.add(self.rosemary_vr_row)
 
         clear_cache = widgets._button_row(_("Clear Roblox cache"))
         clear_cache.set_tooltip_text(
@@ -1280,18 +1129,6 @@ class SettingsPage(Adw.Bin):
         except rosemary_runtime.RosemaryError as error:
             self.rosemary_runner_row.set_subtitle(str(error).splitlines()[0])
             self.rosemary_install_button.set_label(_("Install"))
-        settings = self.window.settings
-        try:
-            program = rosemary_runtime.find_rosemary(settings)
-            self.rosemary_vr_row.set_subtitle(
-                _("Ready: turn on VR in the VR tab")
-                if rosemary_xr.supports_vr(program)
-                else _(
-                    'This Rosemary cannot load VR. Choose Quadra\'s Rosemary under "Rosemary build".'
-                )
-            )
-        except rosemary_runtime.RosemaryError:
-            self.rosemary_vr_row.set_subtitle(_("Install Rosemary first"))
         self.rosemary_client_row.set_subtitle(
             rosemary_runtime.installed_version(settings) or _("Not installed")
         )

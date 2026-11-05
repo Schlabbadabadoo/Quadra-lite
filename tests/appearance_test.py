@@ -24,15 +24,15 @@ class AppearanceSettingsTests(unittest.TestCase):
             file = Path(directory) / "settings.json"
             file.write_text(json.dumps({"launcher_appearance": "grid"}))
             with patch.object(core, "SETTINGS_FILE", file):
-                self.assertEqual(core.load_settings()["launcher_appearance"], "grid")
+                self.assertEqual(core.load_settings()["launcher_appearance"], "gnome")
 
     def test_each_appearance_persists_and_invalid_values_use_gnome(self):
         with tempfile.TemporaryDirectory() as directory:
             file = Path(directory) / "settings.json"
             with patch.object(core, "SETTINGS_FILE", file):
-                for code in ("grid", "gnome", "monochrome"):
+                for code in ("gnome",):
                     core.save_settings(dict(core.DEFAULT_SETTINGS, launcher_appearance=code))
                     self.assertEqual(core.load_settings()["launcher_appearance"], code)
-                for code in (None, True, 2, [], {}, "unknown", "../../style.css"):
+                for code in (None, True, 2, [], {}, "unknown", "grid", "monochrome", "../../style.css"):
                     file.write_text(json.dumps({"launcher_appearance": code}))
                     self.assertEqual(core.load_settings()["launcher_appearance"], "gnome")

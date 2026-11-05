@@ -345,7 +345,7 @@ class MiscTests(unittest.TestCase):
         self.assertTrue(backends.supports("darling", "dns"))
         self.assertFalse(backends.supports("rosemary", "dns"))
         self.assertTrue(backends.supports("rosemary", "mods"))
-        self.assertTrue(backends.supports("rosemary", "vr"))     # with Quadra's build of Rosemary (rosemary_xr)
+        self.assertFalse(backends.supports("rosemary", "vr"))
         self.assertFalse(backends.supports("rosemary", "m2vk"))
         self.assertEqual(backends.other_runtimes("dns"), ["Darling"])
         self.assertFalse(backends.supports("nothing", "mods"))

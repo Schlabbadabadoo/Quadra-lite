@@ -25,7 +25,7 @@ from gi.repository import Adw, Gio, GLib
 application = Adw.Application(application_id="io.github.schlabbadabadoo.QuadraLite.TransportTest",
                               flags=Gio.ApplicationFlags.NON_UNIQUE)
 application.register(None)
-settings = dict(core.DEFAULT_SETTINGS, setup_complete=True, discord_rpc=False,
+settings = dict(core.DEFAULT_SETTINGS, setup_complete=True,
                 hide_launcher_on_launch=True, show_launcher_after_exit=False)
 
 with ExitStack() as context:

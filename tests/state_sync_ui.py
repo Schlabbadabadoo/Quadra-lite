@@ -75,12 +75,6 @@ with patch.object(core, "load_settings", return_value=settings), \
     window.set_setting("roblox_channel", "zbeta")
     assert page.channel_row.get_subtitle() == "zbeta"
 
-    window.set_setting("discord_rpc", False)
-    game_name, = rows(page, Adw.SwitchRow, "Show experience name in Discord")
-    assert not game_name.get_sensitive()
-    window.set_setting("discord_rpc", True)
-    assert game_name.get_sensitive()
-
     assert play.play.get_label() == "Play"
     window.set_setting("runtime_backend", "rosemary")
     assert page.backend_row.get_selected() == 1
@@ -90,12 +84,6 @@ with patch.object(core, "load_settings", return_value=settings), \
     window.set_setting("rosemary_force_opengl", True)
     assert play.dashboard_facts["renderer"].get_label() == "OpenGL"
     window.set_setting("rosemary_force_opengl", False)
-    window.set_setting("vr", True)
-    assert play.dashboard_facts["renderer"].get_label() == "OpenGL"
-    window.set_setting("rosemary_vr_zink", True)
-    assert play.dashboard_facts["renderer"].get_label() == "Vulkan / Zink"
-    window.set_setting("vr", False)
-    assert play.dashboard_facts["renderer"].get_label() == "Metal"
     window.set_setting("runtime_backend", "darling")
     assert page.backend_row.get_selected() == 0 and play.play.get_label() == "Play"
 

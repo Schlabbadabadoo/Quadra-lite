@@ -50,10 +50,6 @@ clang -O2 -Wall -Wextra tests/mouse_motion_test.c -o "$test_build/mouse-motion"
 "$test_build/mouse-motion"
 clang -O2 -Wall -Wextra tests/x_key_codes_test.c -o "$test_build/x-key-codes"
 "$test_build/x-key-codes"
-if pkg-config --exists openxr egl; then
-  clang -O2 -Wall -Wextra tests/vr_openxr_abi_test.c tests/vr_openxr_abi_khronos.c -o "$test_build/vr-openxr-abi"
-  "$test_build/vr-openxr-abi"
-fi
 if pkg-config --exists sdl2 wayland-client wayland-egl wayland-cursor; then
   clang++ -std=c++17 -O2 -Wall -Wextra -pthread tests/wayland_keyboard_test.cpp \
     $(pkg-config --cflags --libs sdl2 wayland-client wayland-egl wayland-cursor) \

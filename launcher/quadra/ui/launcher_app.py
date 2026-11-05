@@ -129,7 +129,6 @@ class LauncherApp(Adw.Application):
                 if window.settings_page:
                     window.settings_page.flush()
                 window._stop_web()
-                window._stop_rpc()
                 window.settings.save()
             except Exception as error:
                 print("Saving before exit failed:", error)

@@ -11,7 +11,7 @@ from pathlib import Path
 import threading
 import time
 
-from quadra import activity, dns, game_meta, region, fflag_allowlist, history, logevents, modguard
+from quadra import activity, dns, game_meta, region, fflag_allowlist, history, logevents
 
 
 def _payload(names):
@@ -112,50 +112,6 @@ class HistoryTests(unittest.TestCase):
             (Path(tmp) / "server-history.json").write_text("{nope")
             self.assertEqual(history.load(tmp), {})
             history.record(tmp, 1, "a")  # recovers
-
-
-class ModGuardTests(unittest.TestCase):
-    def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.root = Path(self.tmp.name)
-        self.config = self.root / "config"
-        self.mods = self.root / "mods"
-        self.mods.mkdir()
-        (self.mods / "README.txt").write_text("x")
-
-    def tearDown(self):
-        self.tmp.cleanup()
-
-    def run_session(self, *, crashed, seconds):
-        modguard.begin_session(self.config, self.mods, now=1000)
-        return modguard.end_session(self.config, self.mods, crashed=crashed, now=1000 + seconds)
-
-    def test_new_unit_in_a_quick_crash_is_set_aside(self):
-        (self.mods / "textures").mkdir()
-        self.assertEqual(self.run_session(crashed=False, seconds=600), [])  # baseline: textures is good
-        (self.mods / "sounds").mkdir()
-        self.assertEqual(self.run_session(crashed=True, seconds=20), ["sounds"])
-        self.assertTrue((self.mods / "sounds.disabled").exists())
-        self.assertTrue((self.mods / "textures").exists())
-        self.assertEqual(modguard.units(self.mods), ["textures"])
-        self.assertEqual(modguard.disabled_units(self.mods), ["sounds"])
-        self.assertTrue(modguard.restore(self.mods, "sounds"))
-        self.assertTrue((self.mods / "sounds").exists())
-
-    def test_no_baseline_means_no_action(self):
-        (self.mods / "textures").mkdir()
-        self.assertEqual(self.run_session(crashed=True, seconds=5), [])
-        self.assertTrue((self.mods / "textures").exists())
-
-    def test_late_crash_is_not_blamed_on_mods(self):
-        (self.mods / "a").mkdir()
-        self.run_session(crashed=False, seconds=600)
-        (self.mods / "b").mkdir()
-        self.assertEqual(self.run_session(crashed=True, seconds=modguard.SETTLE_SECONDS + 1), [])
-        self.assertTrue((self.mods / "b").exists())
-
-    def test_end_without_begin_is_harmless(self):
-        self.assertEqual(modguard.end_session(self.config, self.mods, crashed=True), [])
 
 
 def _query(name, qtype=1):

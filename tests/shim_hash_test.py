@@ -15,7 +15,7 @@ class ShimSourceHashTests(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name)
         for name in ("darling/shim/libQuadraShims.m", "darling/shim/net_trace.c", "darling/shim/worker_wake.h",
-                     "darling/frameworks/CoreML.m", "vr/vr_device.c", "vr/vr_xr.h"):
+                     "darling/frameworks/CoreML.m"):
             path = self.root / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("// original")
@@ -29,7 +29,7 @@ class ShimSourceHashTests(unittest.TestCase):
         before = core._shim_sources_hash()
         self.assertEqual(core._shim_sources_hash(), before)
         for name in ("darling/shim/libQuadraShims.m", "darling/shim/net_trace.c", "darling/shim/worker_wake.h",
-                     "darling/frameworks/CoreML.m", "vr/vr_device.c", "vr/vr_xr.h", "build_debug_shim.sh"):
+                     "darling/frameworks/CoreML.m", "build_debug_shim.sh"):
             with self.subTest(name=name):
                 path = self.root / name
                 original = path.read_text()
@@ -40,10 +40,10 @@ class ShimSourceHashTests(unittest.TestCase):
 
     def test_the_real_repository_sources_are_all_found(self):
         with mock.patch.object(core, "PROJECT", Path(__file__).resolve().parents[1]):
-            sources = [*(core.PROJECT / "darling" / "shim").glob("*"), *(core.PROJECT / "vr").glob("*"),
+            sources = [*(core.PROJECT / "darling" / "shim").glob("*"),
                        *(core.PROJECT / "darling" / "frameworks").glob("*")]
         names = {path.name for path in sources}
-        for expected in ("libQuadraShims.m", "net_trace.c", "vr_device.c", "vr_xr.c", "CoreML.m"):
+        for expected in ("libQuadraShims.m", "net_trace.c", "CoreML.m"):
             self.assertIn(expected, names)
 
 

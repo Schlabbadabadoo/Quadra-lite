@@ -11,7 +11,6 @@ in the order they load (a module only uses the ones above it):
     flags_page       the fast flags editor
     settings_page    Settings and its tabs, with the runtime choice
     info_page        Info
-    mods_page        Mods
     servers_page     Servers
     boot_splash      the splash shown while Roblox starts
     launcher_window  the window: holds the pages, starts, watches and stops the game
@@ -40,7 +39,6 @@ from . import (
     launcher_app,
     launcher_window,
     logs_view,
-    mods_page,
     play_page,
     servers_page,
     settings_page,
@@ -59,7 +57,6 @@ namespace.share_names(
         flags_page,
         settings_page,
         info_page,
-        mods_page,
         servers_page,
         boot_splash,
         launcher_window,
@@ -75,7 +72,6 @@ if TYPE_CHECKING:  # tells editors and type checkers what ui.NAME is
     from .launcher_app import *
     from .launcher_window import *
     from .logs_view import *
-    from .mods_page import *
     from .play_page import *
     from .servers_page import *
     from .settings_page import *

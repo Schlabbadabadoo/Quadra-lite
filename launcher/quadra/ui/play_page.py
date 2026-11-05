@@ -8,7 +8,6 @@ from ..rosemary import runtime as rosemary_runtime
 from . import dialogs, logs_view, system
 
 __all__ = [
-    "PLAYTIME_SETTINGS",
     "RENDERER_NAMES",
     "SETTINGS_SHOWN",
     "PlayPage",
@@ -23,10 +22,7 @@ SETTINGS_SHOWN = (
     "rosemary_prefix",
     "rosemary_pinned_build",
     "rosemary_force_opengl",
-    "vr",
-    "rosemary_vr_zink",
 )
-PLAYTIME_SETTINGS = ("show_playtime", "playtime_seconds")
 
 RENDERER_NAMES = {
     "opengl": "OpenGL",
@@ -98,16 +94,6 @@ class PlayPage(Adw.Bin):
         self.action_bar = action_bar
         self.toolbar_view = toolbar_view
 
-        self.playtime_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        self.playtime_box.set_valign(Gtk.Align.CENTER)
-        self.playtime_box.add_css_class("dim-label")
-        clock_icon = Gtk.Image(icon_name="preferences-system-time-symbolic")
-        self.playtime_label = Gtk.Label()
-        self.playtime_box.append(clock_icon)
-        self.playtime_box.append(self.playtime_label)
-        self.playtime_box.set_tooltip_text(_("Total playtime"))
-        action_bar.pack_start(self.playtime_box)
-
         self.play = Gtk.Button(label=_("Play"))
         self.play.add_css_class("suggested-action")
         self.play.add_css_class("pill")
@@ -128,9 +114,6 @@ class PlayPage(Adw.Bin):
         window.watch_activity(self.refresh)
         window.watch_client(self.refresh)
         window.watch_setting(SETTINGS_SHOWN, lambda _key, _value: self.refresh())
-        window.watch_setting(
-            PLAYTIME_SETTINGS, lambda _key, _value: self.refresh_playtime()
-        )
         self.refresh()
 
     def _dashboard(self):
@@ -319,20 +302,7 @@ class PlayPage(Adw.Bin):
             return RENDERER_NAMES.get(settings.get("renderer", "opengl"), "OpenGL")
         if settings.get("rosemary_force_opengl", False):
             return "OpenGL"
-        if settings.get("vr", False):
-            return (
-                RENDERER_NAMES["vulkan"]
-                if settings.get("rosemary_vr_zink", False)
-                else "OpenGL"
-            )
         return "Metal"
-
-    def refresh_playtime(self):
-        show = self.window.settings.get("show_playtime", True)
-        self.playtime_box.set_visible(show)
-        if show:
-            sec = self.window.settings.get("playtime_seconds", 0)
-            self.playtime_label.set_text(core.format_playtime(sec))
 
     def refresh(self):
         running = self.window.session is not None
@@ -407,4 +377,3 @@ class PlayPage(Adw.Bin):
             self.play.set_sensitive(not busy)
 
         self.log_button.set_visible(bool(self.window.last_log) and not running)
-        self.refresh_playtime()

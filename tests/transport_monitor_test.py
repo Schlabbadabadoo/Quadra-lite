@@ -94,7 +94,7 @@ class TransportMonitorTests(unittest.TestCase):
         self.assertIsNone(self.monitor.warning_transport)
 
     def test_session_checks_transport_even_without_discord_and_before_early_exit(self):
-        session = bare_session(dict(core.DEFAULT_SETTINGS, discord_rpc=False))
+        session = bare_session(dict(core.DEFAULT_SETTINGS))
         self.path.write_bytes(selection(b"RbxTransport"))
         session.log_path = self.path
         session.process = Mock()

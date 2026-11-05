@@ -597,23 +597,9 @@ class RosemarySession:
                 f"Roblox cache cleared before launch ({freed // 1_000_000} MB)"
             )
         from .. import core
-        from . import xr as rosemary_xr
 
-        # VR: the library is injected and Roblox runs on OpenGL (its VR device
-        # attaches to that renderer). A reason it cannot start is logged and the
-        # game starts without VR, as with Darling.
-        vr_session, vr_note = None, None
-        try:
-            vr_session = rosemary_xr.prepare(self.settings, self.rosemary, core)
-        except rosemary_xr.VrUnavailable as error:
-            vr_note = "VR: " + str(error).replace("\n", " ")
-            self.notes.append(vr_note)
         flags = dict(core.load_fast_flags())
-        if vr_session:
-            flags.update(vr_session.flags)
-        # Always written: a flag from an earlier start (VR's OpenGL) must not stay behind.
         rosemary_client.write_fast_flags(bundle, flags)
-        self._apply_mods(build, bundle)
         logs = self.logs_dir or core.LOGS
         logs.mkdir(parents=True, exist_ok=True)
         self.log_path = logs / time.strftime("launch-%Y%m%d-%H%M%S-rosemary.log")
@@ -624,8 +610,6 @@ class RosemarySession:
             # The limit is in place before Rosemary starts, so no thread escapes it.
             argv = [taskset, "-c", cpus] + argv
         env = run_env(self.settings)
-        if vr_session:
-            vr_session.apply(env)
         root = self.prefix / "root"
         root.mkdir(parents=True, exist_ok=True)
         with open(self.log_path, "wb") as log_file:
@@ -633,10 +617,6 @@ class RosemarySession:
                 f"[Quadra Lifecycle] runtime=rosemary rosemary={self.rosemary} "
                 f"prefix={self.prefix} app={bundle}\n".encode()
             )
-            if vr_session or vr_note:
-                log_file.write(
-                    ((vr_session.log if vr_session else vr_note) + "\n").encode()
-                )
             log_file.flush()
             self.started_at = time.time()
             self.process = subprocess.Popen(
@@ -651,24 +631,6 @@ class RosemarySession:
         self.cpu_limited = bool(taskset) or bool(
             cpus and self._limit_cpus_after_start(cpus)
         )
-
-    def _apply_mods(self, build, bundle):
-        """The mods folder and presets go into this client's own content, with
-        their backups kept per build so one build's files never restore into
-        another."""
-        if not self.settings.get("enable_custom_mods", True):
-            return
-        try:
-            from .. import core, modguard, mods
-
-            mods.apply_mods(
-                self.settings,
-                bundle / "Contents" / "Resources" / "content",
-                backup_dir=rosemary_client.data_dir() / "mods_backup" / build.key,
-            )
-            modguard.begin_session(core.CONFIG_DIR, mods.MODS_DIR)
-        except Exception as error:  # a broken mod must not stop the game
-            log.warning("Could not apply mods: %s", error)
 
     def _cpu_list(self):
         """The first N cores this process may use, as `taskset -c` writes them, or None."""
