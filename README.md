@@ -92,7 +92,12 @@ quadralite --collect-diagnostics
 Settings: `~/.config/quadralite/settings.json`  
 Cache/logs: `~/.cache/quadralite/`
 
-## Compatibility
+## Hardware detection
+
+Quadra Lite detects CPU, GPU, VRAM, RAM, display, and graphics capabilities
+(OpenGL/Vulkan) automatically. The results are shown on the Info page, with a
+refresh button. Missing information is reported as "unknown" rather than
+failing. Detection is cached and runs off the UI thread.
 
 Tested on CachyOS, Arch, Ubuntu 24.04+, Debian 13, Linux Mint 22 and Fedora,
 with NVIDIA, AMD and Intel GPUs. Rosemary is recommended on NVIDIA; Darling works
