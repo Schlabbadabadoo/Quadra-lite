@@ -90,6 +90,8 @@ Cache/logs: `~/.cache/quadralite/`
 
 ## Troubleshooting
 
+Join the [Discord server](https://discord.gg/tEprTnKu7A) for help and questions.
+
 - **Roblox won't start / wrong renderer:** Settings → Roblox and Settings →
   Quadra M2VK. Metal (Quadra M2VK) needs a Vulkan-capable GPU.
 - **Missing libraries:** install the dependencies above.

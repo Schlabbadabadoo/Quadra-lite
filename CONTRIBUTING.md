@@ -18,7 +18,7 @@ usually nothing to diagnose.
 
 Issues and attachments are public. Look through the archive before you upload it, and never paste your
 `.ROBLOSECURITY` cookie, a join link or a token anywhere. Questions and feature ideas go to the
-[Discord server](https://discord.gg/W8jXfngc8z). If you find a security problem, don't open a public issue;
+[Discord server](https://discord.gg/tEprTnKu7A). If you find a security problem, don't open a public issue;
 message a maintainer on Discord.
 
 ## Hardware testing
