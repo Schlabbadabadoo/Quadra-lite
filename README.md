@@ -83,6 +83,14 @@ sudo pacman -S python python-gobject gtk4 libadwaita webkitgtk-6.0 unzip
 
 ## Usage
 
+Run from a source checkout without installing:
+
+```bash
+PYTHONPATH=launcher python3 -m quadra.cli
+```
+
+Or after installing:
+
 ```bash
 quadralite              # open the launcher
 quadralite --settings   # open settings directly
