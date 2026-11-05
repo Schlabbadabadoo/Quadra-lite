@@ -497,6 +497,15 @@ class SettingsPage(Adw.Bin):
         self.env_page.add(diagnostics)
         window.runtime_only(diagnostics, "diagnostics", hide=True)
 
+        backup_group = Adw.PreferencesGroup(title=_("Configuration backup"))
+        export_btn = widgets._button_row(_("Export settings"))
+        export_btn.connect("activated", lambda *_args: self._export_settings())
+        backup_group.add(export_btn)
+        import_btn = widgets._button_row(_("Import settings"))
+        import_btn.connect("activated", lambda *_args: self._import_settings())
+        backup_group.add(import_btn)
+        self.env_page.add(backup_group)
+
         self.stack.add_titled_with_icon(
             self.env_page, "env", _("Environment"), "preferences-system-symbolic"
         )
@@ -625,6 +634,30 @@ class SettingsPage(Adw.Bin):
         for key in ("runtime_backend", "renderer", "auto_config_mode"):
             self.window.set_setting(key, new_settings[key])
         dialogs._toast(self.window.toasts, _("Configuration applied"))
+
+    def _export_settings(self):
+        from ..core import config
+        from pathlib import Path
+
+        path = Path.home() / ".config" / "quadralite" / "settings.backup.json"
+        try:
+            config.export_settings(path)
+            dialogs._toast(self.window.toasts, _("Settings exported to {path}").format(path=path))
+        except Exception as e:
+            dialogs._error_dialog(self.window, _("Export failed"), str(e))
+
+    def _import_settings(self):
+        from ..core import config
+        from pathlib import Path
+
+        path = Path.home() / ".config" / "quadralite" / "settings.backup.json"
+        try:
+            new = config.import_settings(path)
+            for key, value in new.items():
+                self.window.set_setting(key, value)
+            dialogs._toast(self.window.toasts, _("Settings imported"))
+        except Exception as e:
+            dialogs._error_dialog(self.window, _("Import failed"), str(e))
 
     def set_tab(self, tab):
         self.stack.set_visible_child_name(tab)
