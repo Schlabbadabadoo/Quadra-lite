@@ -1,3 +1,5 @@
+- Read `AI_USAGE_POLICY.md` before making any changes.
+
 # Quadra Lite
 
 Lightweight, game-only fork of Quadra. Run the tests with:
