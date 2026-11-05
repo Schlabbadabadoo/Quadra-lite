@@ -72,6 +72,9 @@ sudo apt install python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 \
   gir1.2-webkit-6.0 unzip
 ```
 
+WebKitGTK is used only by the launcher for the embedded sign-in web view;
+Roblox itself does not depend on it.
+
 **Dependencies (Arch/CachyOS/EndeavourOS/Manjaro):**
 
 ```bash
