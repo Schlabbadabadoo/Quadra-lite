@@ -168,6 +168,7 @@ class LauncherApp(Adw.Application):
                 or window.setup_active
                 or not window.runtime_ready()
                 or os.environ.get("QUADRA_PAGE")
+                or not window.settings.get("auto_launch_roblox", False)
             )
             if needs_window:
                 window.present_settings()

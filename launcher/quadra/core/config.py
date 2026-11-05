@@ -61,6 +61,7 @@ DEFAULT_SETTINGS = {
     "show_sidebar": True,
     "framerate_cap": 0,
     "hide_launcher_on_launch": False,
+    "auto_launch_roblox": False,
     "show_playtime": True,
     # Sends the game server's IP address to RoValra, so it is opt-in. (The
     # former show_server_location key was saved as true for everyone.)

@@ -325,6 +325,14 @@ class SettingsPage(Adw.Bin):
             widgets.bind_switch(window, hide_launcher, "hide_launcher_on_launch", False)
         )
 
+        auto_launch = Adw.SwitchRow(
+            title=_("Launch Roblox on startup"),
+            subtitle=_("Start the game automatically when the launcher opens"),
+        )
+        game.add(
+            widgets.bind_switch(window, auto_launch, "auto_launch_roblox", False)
+        )
+
         reopen = Adw.SwitchRow(
             title=_("Open settings after Roblox exits"),
             subtitle=_("Otherwise Quadra closes with the game"),
