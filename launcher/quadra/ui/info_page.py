@@ -4,7 +4,7 @@ import threading
 
 from gi.repository import Adw, Gdk, GLib, Gtk
 
-from .. import author, hardware
+from .. import author, hardware, runtime_health
 from ..i18n import _
 from . import system
 
@@ -35,6 +35,18 @@ class InfoPage(Adw.PreferencesPage):
             row.connect("activated", lambda *_args, u=uri: system._open_uri(window, u))
             community.add(row)
         self.add(community)
+
+        health_group = Adw.PreferencesGroup(title=_("Runtime health"))
+        self.health_row = Adw.ActionRow(title=_("Status"))
+        self.health_value = Gtk.Label(xalign=1, css_classes=["dim-label"])
+        self.health_row.add_suffix(self.health_value)
+        health_group.add(self.health_row)
+        health_refresh = Adw.ActionRow(title=_("Re-check"), activatable=True)
+        health_refresh.add_suffix(Gtk.Image(icon_name="view-refresh-symbolic"))
+        health_refresh.connect("activated", lambda *_args: self._refresh_health())
+        health_group.add(health_refresh)
+        self.add(health_group)
+        self._refresh_health()
 
         hardware_group = Adw.PreferencesGroup(title=_("Hardware"))
         self.hardware_rows = {}
@@ -134,6 +146,17 @@ class InfoPage(Adw.PreferencesPage):
             ),
             daemon=True,
         ).start()
+
+    def _refresh_health(self):
+        def work():
+            report = runtime_health.check(self.window.settings)
+            GLib.idle_add(self._apply_health, report)
+
+        threading.Thread(target=work, daemon=True).start()
+
+    def _apply_health(self, report):
+        self.health_value.set_label(report.overall)
+        return False
 
     def _refresh_hardware(self):
         def work():

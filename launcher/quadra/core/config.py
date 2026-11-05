@@ -1,6 +1,10 @@
 """The launcher's settings: their defaults, loading and saving them, and the last error."""
 
 import json
+import os
+import shutil
+from pathlib import Path
+
 
 from .. import backends
 from ..darling.runtime import is_bundled
@@ -11,6 +15,8 @@ __all__ = [
     "TRACE_ENV",
     "TRACE_ENV_INHERITED",
     "clear_last_error",
+    "export_settings",
+    "import_settings",
     "load_settings",
     "save_settings",
 ]
@@ -59,6 +65,7 @@ DEFAULT_SETTINGS = {
     "framerate_cap": 0,
     "hide_launcher_on_launch": False,
     "auto_launch_roblox": False,
+    "auto_config_mode": "auto",
     # Sends the game server's IP address to RoValra, so it is opt-in. (The
     # former show_server_location key was saved as true for everyone.)
     "server_location_lookup": False,
@@ -187,3 +194,34 @@ def clear_last_error():
     except OSError:
         pass
 
+
+
+def export_settings(path):
+    """Write current settings to a JSON file."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(load_settings(), indent=2, ensure_ascii=False))
+
+
+def import_settings(path):
+    """Load and validate settings from a JSON file. Returns a settings dict."""
+    path = Path(path)
+    data = json.loads(path.read_text())
+    if not isinstance(data, dict):
+        raise ValueError("settings file must contain an object")
+    # validate against defaults
+    result = dict(DEFAULT_SETTINGS)
+    for key, value in data.items():
+        if key not in DEFAULT_SETTINGS:
+            continue
+        default = DEFAULT_SETTINGS[key]
+        if isinstance(default, bool):
+            if isinstance(value, bool):
+                result[key] = value
+        elif isinstance(default, (int, float)):
+            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                result[key] = type(default)(value)
+        else:
+            if default is None or isinstance(value, type(default)):
+                result[key] = value
+    return result

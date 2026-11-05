@@ -122,6 +122,36 @@ class SettingsPage(Adw.Bin):
             lambda row, _pspec: window.set_language(codes[row.get_selected()]),
         )
         interface.add(language)
+
+        from .. import auto_config
+
+        self.auto_config_codes = list(auto_config.MODES)
+        auto_config_row = widgets.ComboRow(
+            title=_("Configuration mode"),
+            subtitle=_("Auto picks a compatible runtime and renderer from your hardware"),
+            model=Gtk.StringList.new([_(m.capitalize()) for m in self.auto_config_codes]),
+        )
+        auto_config_row.set_selected(
+            self.auto_config_codes.index(
+                window.settings.get("auto_config_mode", "auto")
+                if window.settings.get("auto_config_mode", "auto") in self.auto_config_codes
+                else "auto"
+            )
+        )
+        auto_config_row.connect(
+            "notify::selected",
+            lambda row, _pspec: window.set_setting(
+                "auto_config_mode", self.auto_config_codes[row.get_selected()]
+            ),
+        )
+        interface.add(auto_config_row)
+
+        apply_btn = widgets._button_row(_("Apply recommended configuration"))
+        apply_btn.connect(
+            "activated",
+            lambda *_args: self._apply_auto_config(),
+        )
+        interface.add(apply_btn)
         tray_switch = Adw.SwitchRow(
             title=_("Tray icon"),
             subtitle=_(
@@ -586,6 +616,15 @@ class SettingsPage(Adw.Bin):
         self.appearance_tabs = widgets._add_tabs(toolbar_view, self.stack)
 
         self.set_child(toolbar_view)
+
+    def _apply_auto_config(self):
+        from .. import auto_config
+
+        mode = self.window.settings.get("auto_config_mode", "auto")
+        new_settings = auto_config.apply_mode(self.window.settings.snapshot(), mode)
+        for key in ("runtime_backend", "renderer", "auto_config_mode"):
+            self.window.set_setting(key, new_settings[key])
+        dialogs._toast(self.window.toasts, _("Configuration applied"))
 
     def set_tab(self, tab):
         self.stack.set_visible_child_name(tab)
